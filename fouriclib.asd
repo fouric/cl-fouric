@@ -15,4 +15,7 @@
 
     :serial t
     :pathname "src"
-    :components ((:file "library")))
+    :components ((:file "library")
+		 (:file "sdl2" :depends-on ("library")))
+    
+    :depends-on (:sdl2 :sdl2-ttf))

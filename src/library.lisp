@@ -1,33 +1,3 @@
-;(defun main-function ()
-;  (ext:exit))
-
-;; clisp
-;;(ext:saveinitmem "filename.elf"
-;;  :quiet t
-;;  :init-function 'main-function
-;;  :executable t
-;;  :norc t)
-
-;; sbcl
-;; (sb-ext:save-lisp-and-die "filename.elf" :toplevel 'main-function :executable t)
-
-;(defparameter dx 0.0001)
-;(defun derive (f)
-;  (lambda (x)
-;    (/ (- (funcall f (+ x dx)) (funcall f x)) dx)))
-;(defun cube (x)
-;  (* x x x))
-;(funcall (derive (function cube)) 2)
-
-; define setf interactions on a thing
-;(defun (setf TYPE) (thing)
-;  (setf (field TYPE) thing))
-
-; (defparameter *var* 2)
-; (defparameter *thread* (bordeaux-threads:make-thread (lambda () (+ *var* 1))))
-; (bordeaux-threads:join-thread *thread*)
-
-
 (defun range (x y)
   (if (= x y)
     (cons y nil)
@@ -102,6 +72,13 @@
     (with-standard-io-syntax
       (read in))))
 
+(defmacro make-alpha-with-macro (macro-name constructor destructor)
+  "creates a macro that accepts an ARG and calls (CONSTRUCTOR ARG) and (DESTRUCTOR ARG)"
+  ` (defmacro ,macro-name ((name args) &body body)
+      `(let ((,name (,',constructor ,@args)))
+	 ,@body
+	 (,',destructor ,name))))
+
 (defmacro make-with-macro (macro-name constructor destructor)
   `(defmacro ,macro-name ((name args) &body body)
      `(let ((,name (,',constructor ,@args)))
@@ -110,6 +87,11 @@
 
 (defmacro print-call (call)
   `(format t "~s => ~s~%" ',call ,call))
+
+#|
+(defun pathcat (append-slash? &rest values)
+  (apply #'concatenate (append (list 'string "") values (list (if append-slash? "/" "")))))
+|#
 
 #|
 (with-shader (shader (:vertex-shader :filename vertex-shader-filename))
@@ -170,85 +152,65 @@
 	  ,@(mapcar (lambda (initform) (list ',destructor (first initform))) shader-init-forms)
 	  ,retval))))
 
-#|
-(defun find-dollar-signs (string)
-  (labels ((find-next-break-char (pos)
-	     (loop as i to (1- (length string)) do
-		  (let ((char (schar string i)))
-		    (when (or (char= char #\Space) (char= char #\~))
-		      (return i)))))
-	   (finder (positions)
-	     (let* ((last-match (car positions))
-		    (start-index (if last-match
-				     (1+ last-match)
-				     0))
-		    (pos (if (= (length string) start-index)
-			     nil
-			     (position #\$ string
-				       :start start-index
-				       :end (find-next-break-char start-index)))))
-	       (if pos
-		   (finder (push pos positions))
-		   positions))))
-    (nreverse (finder nil))))
+(defmacro make-with-macros-2 (macro-name constructor-form destructor-form)
+  `(defmacro ,macro-name (shader-init-forms &body body)
+     (let ((retval (gensym "RETVAL")))
+       `(let ,(append (mapcar (lambda (initform) (cons (first initform) (list (cons ',constructor-form (first (rest initform)))))) shader-init-forms)
+		      (list retval))
+	  ,@(butlast body)
+	  (setf ,retval ,(first (last body)))
+	  ,@(mapcar ,destructor-form shader-init-forms)
+	  ,retval))))
 
-(defun extract-tokens (string positions)
-  (remove-if (lambda (str)
-	       (or (string= str "")
-		   (string= str "$")))
-	     (mapcar (lambda (position)
-		       (let ((end (position #\Space string :start position)))
-			 (subseq string position end))) positions)))
+;; just a shortcut for getting a thing from a place relative to a path
+(defun resource (path &optional (system 'gooey))
+  (asdf:system-relative-pathname system path))
 
-(defun $token->token (token)
-  (intern (string-upcase (subseq token 1))))
+(defmacro with-dot-accessors (type-mappings &body body)
+  (labels
+      ;; is the given symbol a candidate for transformation? that is, does it have exactly one . (dot) in it?
+      ((valid? (symbol)
+	 (let* ((name (string symbol))
+		(position (search "." name)))
+	   (when position
+	     (let ((second-position (search "." name :start2 (1+ position))))
+	       (when (or (not second-position) (= position second-position))
+		 position)))))
 
-(defun replace-all (string part replacement &key (test #'char=))
-"Returns a new string in which all the occurences of the part 
-is replaced with replacement."
-    (with-output-to-string (out)
-      (loop with part-length = (length part)
-            for old-pos = 0 then (+ pos part-length)
-            for pos = (search part string
-                              :start2 old-pos
-                              :test test)
-            do (write-string string out
-                             :start old-pos
-                             :end (or pos (length string)))
-            when pos do (write-string replacement out)
-            while pos))) 
+       ;; split the given symbol into two separate symbols around (not including) the index character
+       (split (symbol index)
+	 (let ((name (string symbol)))
+	   (cons (intern (subseq name 0 index)) (intern (subseq name (1+ index))))))
 
-(defun string-replace (string find replace)
-  (let ((position (search find string))
-	(length (length find)))
-    (if position
-	(concatenate 'string
-		     (subseq string 0 position)
-		     replace
-		     (subseq string (+ position length)))
-	string)))
+       (split-if-valid (symbol)
+	 (let ((position? (valid? symbol)))
+	   (when position?
+	     (split symbol position?))))
 
-(defun transform-string (string tokens)
-  (let ((vars nil)
-	(string (copy-seq string)))
-    (setf string (replace-all string "~" "~~"))
-    (dolist (token tokens)
-      (let ((sym-token ($token->token token)))
-	(setf string (replace-all string token "~A"))
-	(push sym-token vars)))
-    (values string (nreverse vars))))
+       (get-type (symbol)
+	 (let (type)
+	   (dolist (type-form type-mappings)
+	     (when (member symbol (cadr type-form))
+	       (setf type (first type-form))
+	       (return)))
+	   type))
 
-;; warning: breaks (defun foo-$bar (...) ...)
-
-(defun dollar-sign-reader (stream char)
-  (declare (ignore char))
-  (let ((string (read stream t nil t)))
-    (if (stringp string)
-	(multiple-value-bind (string vars)
-	    (transform-string string (extract-tokens string (find-dollar-signs string)))
-	  `(format nil ,string ,@vars))
-	string)))
-
-(set-macro-character #\$ #'dollar-sign-reader)
-
-|#
+       (transform (symbol)
+	 (let ((split (split-if-valid symbol)))
+	   (if split
+	       (let* ((name (car split))
+		      (field (cdr split))
+		      (type (get-type name)))
+		 (if type
+		     (list (intern (string-upcase (concatenate 'string (string type) "-" (string field)))) name)
+		     ;(error "type ~S not specified in type-mapping alist ~S" name type-mappings)
+		     symbol
+		     ))
+	       symbol))))
+    
+    (defun process (form)
+      (typecase form
+	(symbol (transform form))
+	(list (mapcar #'process form))
+	(t form)))
+    `(progn ,@ (process body))))
