@@ -4,4 +4,7 @@
    #:read-file
    #:with-init-window-gl
    #:profile
+   #:resource
+   #:doitimes
+   #:while
    ))

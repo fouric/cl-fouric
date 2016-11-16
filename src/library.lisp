@@ -226,3 +226,8 @@
 
 (defmacro profile (&rest packages)
   `(sb-profile:profile ,@(mapcar (lambda (x) (string-upcase (if (and (consp x) (eq (first x) 'quote)) (cadr x) x))) packages)))
+
+(defun update-swank ()
+  (let ((connection (or swank::*emacs-connection* (swank::default-connection))))
+    (when connection
+      (swank::handle-requests connection t))))
