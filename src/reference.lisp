@@ -26,4 +26,3 @@ define setf interactions on a thing
 (defparameter *var* 2)
 (defparameter *thread* (bordeaux-threads:make-thread (lambda () (+ *var* 1))))
 (bordeaux-threads:join-thread *thread*)
-

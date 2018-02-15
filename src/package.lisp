@@ -7,4 +7,5 @@
    #:resource
    #:doitimes
    #:while
+   #:fn-case
    ))

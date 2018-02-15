@@ -111,3 +111,5 @@
      (sdl2:with-window ,window-flags
        (sdl2:with-gl-context ,gl-flags
          ,@body))))
+
+;;(sdl2:gl-set-swap-interval 1)
