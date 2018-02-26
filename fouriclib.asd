@@ -19,4 +19,4 @@
                (:file "library" :depends-on ("package"))
                (:file "sdl2" :depends-on ("library")))
 
-  :depends-on (:sdl2 :sdl2-ttf))
+  :depends-on (:sdl2 :sdl2-ttf :swank))
