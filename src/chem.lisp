@@ -1,1 +1,0 @@
-/home/fouric/chemistry/ArHg/chem.lisp

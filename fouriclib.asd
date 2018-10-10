@@ -16,7 +16,13 @@
   :serial t
   :pathname "src"
   :components ((:file "package")
-               (:file "library" :depends-on ("package"))
-               (:file "sdl2" :depends-on ("library")))
+               (:file "iteration")
+               (:file "io")
+               (:file "macro")
+               (:file "object-access")
+               (:file "strings")
+               (:file "misc")
+               (:file "control-flow")
+               (:file "sdl2"))
 
   :depends-on (:sdl2 :sdl2-ttf :swank))
