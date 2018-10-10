@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defmacro print-call (call)
   `(format t "~s => ~s~%" ',call ,call))

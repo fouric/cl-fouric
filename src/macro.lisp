@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 ;; create a tinylambda, closure-style
 ;; use like so: (mapcar (_ (+ 1 _)) '(3 5 6))

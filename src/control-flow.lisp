@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defmacro fn-case (keyform test &body clauses)
   (let ((kf (gensym))

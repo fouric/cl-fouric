@@ -1,4 +1,4 @@
-(defpackage #:fouriclib
+(defpackage #:fouric
   (:use #:cl)
   (:export
    #:read-file

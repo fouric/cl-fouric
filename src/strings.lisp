@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defun to-string (item)
   (coerce item 'string))

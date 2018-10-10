@@ -1,17 +1,12 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(defpackage #:fouriclib-asd
-  (:use :cl :asdf))
-
-(in-package :fouriclib-asd)
-
-(defsystem fouriclib
-  :name "fouriclib"
-  :version "0.0.0"
-  :maintainer "fouric"
-  :author "fouric"
-  :license "All rights reserved"
+(asdf:defsystem fouric
+  :name "fouric"
   :description "fouric's code library"
+  :version "0.0.0"
+  :maintainer "fouric <fouric@protonmail.com>"
+  :author "fouric <fouric@protonmail.com>"
+  :license "MIT"
 
   :serial t
   :pathname "src"
@@ -25,4 +20,4 @@
                (:file "control-flow")
                (:file "sdl2"))
 
-  :depends-on (:sdl2 :sdl2-ttf :swank))
+  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof))

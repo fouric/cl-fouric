@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defun read-file (filename)
   (with-open-file (in filename

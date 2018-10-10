@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 #|
 (defun pathcat (append-slash? &rest values)

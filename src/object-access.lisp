@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defmacro with-plist-aliases (plist prefix vars &body body)
   `(let ,(mapcar (lambda (var)

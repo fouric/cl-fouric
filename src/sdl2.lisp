@@ -1,4 +1,4 @@
-(in-package #:fouriclib)
+(in-package #:fouric)
 
 (defmacro with-ttf-init (&body body)
   `(progn
