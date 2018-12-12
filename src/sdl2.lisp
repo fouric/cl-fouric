@@ -113,3 +113,111 @@
          ,@body))))
 
 ;;(sdl2:gl-set-swap-interval 1)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (ql:quickload :sdl2))
+
+(defmacro make-accelerated-window-renderer (window-name renderer-name &rest body)
+  `(sdl2:with-init (:everything)
+     (sdl2:with-window (,window-name :flags '(:shown :opengl))
+       (sdl2:with-renderer (,renderer-name ,window-name :flags '(:accelerated))
+	 ,@body))))
+
+(defmacro just-display-it (renderer-name keysym-name keysym-quit-trigger &rest draw-logic)
+  "supply a renderer name, a keysym name, logic that handles the keysym and tells when to quit, and draw logic, and we'll do the rest"
+  `(make-accelerated-window-renderer
+    window
+    ,renderer-name
+    (sdl2:with-event-loop (:method :poll)
+      (:keydown (:keysym ,keysym-name)
+       (if ,keysym-quit-trigger
+	   (sdl2:push-event :quit)))
+      (:idle ()
+	     (sdl2:set-render-draw-color ,renderer-name 0 0 0 255)
+	     (sdl2:render-clear ,renderer-name)
+	     ,@draw-logic
+	     (sdl2:render-present ,renderer-name))
+      (:quit () t))))
+
+(defmacro quick-event-loop-with-window-size (w h &rest body)
+  `(sdl2:with-init (:everything)
+     (sdl2:with-window (window :w ,w :h ,h :flags '(:shown :opengl))
+       (sdl2:with-renderer (renderer window :flags '(:accelerated))
+	 (sdl2:with-event-loop (:method :poll)
+	   ,@body)))))
+
+(defmacro sdl2-omni (((&rest sdl-init-flags)
+                 (window-symbol &key title (x :centered) (y :centered) (w 800) (h 600) window-flags)
+                 (renderer-symbol &key index renderer-flags))
+                &body body)
+  `(sdl2:with-init (,@sdl-init-flags)
+     (sdl2:with-window (,window-symbol :title ,title :x ,x :y ,y :w ,w :h ,h :flags ,window-flags)
+       (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
+         ,@body))))
+
+(defmacro clear-and-render (renderer r g b a &rest body)
+  `(progn
+     (sdl2:set-render-draw-color ,renderer ,r ,g ,b ,a)
+     (sdl2:render-clear ,renderer)
+     ,@body
+     (sdl2:render-present ,renderer)))
+
+;; tiny, specific wrapper around clear-and-render that assumes a renderer
+;; called "renderer" and a black clear value
+(defmacro black-renderer (&rest body)
+  `(clear-and-render renderer 0 0 0 255 ,@body))
+
+(defmacro sdl2-omni (((&rest sdl-init-flags)
+                      (window-symbol &key title (x :centered) (y :centered) (w 800) (h 600) window-flags)
+                      (renderer-symbol &key index renderer-flags))
+                     &body body)
+  `(sdl2:with-init (,@sdl-init-flags)
+     (sdl2:with-window (,window-symbol :title ,title :x ,x :y ,y :w ,w :h ,h :flags ,window-flags)
+       (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
+         ,@body))))
+
+;; NOT thread-safe!
+(let ((rect (sdl2:make-rect 0 0 0 0)))
+  (defun render-rectangle (renderer xy wh rgb &optional (filled t))
+    (plus-c:c-let ((rect sdl2-ffi:sdl-rect :from rect))
+      (setf (rect :x) (car xy)
+            (rect :y) (cdr xy)
+            (rect :w) (car wh)
+            (rect :h) (cdr wh)))
+    (sdl2:set-render-draw-color renderer (nth 0 rgb) (nth 1 rgb) (nth 2 rgb) 255)
+    (if filled
+        (sdl2:render-fill-rect renderer rect)
+        (sdl2:render-draw-rect renderer rect))))
+
+;; NOT thread-safe!
+(let ((rect (sdl2:make-rect 0 0 0 0)))
+  (defun render-texture (renderer texture x y)
+    (plus-c:c-let ((rect sdl2-ffi:sdl-rect :from rect))
+      (setf (rect :x) x
+            (rect :y) y
+            (rect :w) (sdl2:texture-width texture)
+            (rect :h) (sdl2:texture-height texture)))
+    (sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)))
+
+(defmacro with-font ((font-sym path-to-font point-size) &body body)
+  `(let ((,font-sym (sdl2-ttf:open-font ,path-to-font ,point-size)))
+     (unwind-protect
+          (progn
+            ,@body)
+       (sdl2-ttf:close-font ,font-sym))))
+
+(defun get-window-width (win)
+  (multiple-value-bind (w h) (sdl2:get-window-size win)
+    (declare (ignore h))
+    w))
+
+(defun get-window-height (win)
+  (multiple-value-bind (w h) (sdl2:get-window-size win)
+    (declare (ignore w))
+    h))
+
+(defun make-text-texture (renderer path-to-font point-size text r g b a)
+  (with-font (font path-to-font point-size)
+    (let* ((surface (sdl2-ttf:render-utf8-solid font text r g b a))
+           (texture (sdl2:create-texture-from-surface renderer surface)))
+      (sdl2:free-surface surface)
+      texture)))
