@@ -169,17 +169,18 @@
 (defmacro sdl2-omni (((&rest sdl-init-flags)
                       (window-symbol &key title (x :centered) (y :centered) (w 800) (h 600) window-flags)
                       (renderer-symbol &key index renderer-flags)
-                      &optional subsystems)
+                      &optional extras)
                      &body body)
-  `(sdl2:with-init (,@sdl-init-flags)
-     (sdl2:with-window (,window-symbol :title ,title :x ,x :y ,y :w ,w :h ,h :flags ,window-flags)
-       (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
-         ,(if (and subsystems (member :ttf subsystems))
-              `(with-ttf-init
-                 ,@body)
-              ;; awkward, but i couldn't figure out how to just make it do ,@body
-              `(progn
-                 ,@body))))))
+  (let* ((body-with-initials (append (if (and extras (member :initial-clear extras))
+                                         `((sdl2:set-render-draw-color ,renderer-symbol 0 0 0 255)
+                                           (sdl2:render-fill-rect ,renderer-symbol (cffi:null-pointer))
+                                           (sdl2:render-present ,renderer-symbol))
+                                         nil) body))
+         (body-wrapped (append (if (and extras (member :ttf extras)) '(with-ttf-init) '(progn)) body-with-initials)))
+    `(sdl2:with-init (,@sdl-init-flags)
+       (sdl2:with-window (,window-symbol :title ,title :x ,x :y ,y :w ,w :h ,h :flags ,window-flags)
+         (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
+           ,body-wrapped)))))
 
 ;; NOT thread-safe!
 (let ((rect (sdl2:make-rect 0 0 0 0)))
