@@ -20,4 +20,5 @@
    #:clampf
    #:inclampf
    #:+-clamp
+   #:pushlast
    ))

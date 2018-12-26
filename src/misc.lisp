@@ -41,3 +41,6 @@
 (defun +-clamp (number delta min max)
   (incf number delta)
   (min max (max min number)))
+
+(defmacro pushlast (obj place)
+  `(push ,obj (cdr (last ,place))))
