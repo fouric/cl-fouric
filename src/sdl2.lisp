@@ -154,7 +154,7 @@
        (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
          ,@body))))
 
-(defmacro clear-and-render (renderer r g b a &rest body)
+(defmacro clear-and-render ((renderer r g b a) &body body)
   `(progn
      (sdl2:set-render-draw-color ,renderer ,r ,g ,b ,a)
      (sdl2:render-clear ,renderer)
@@ -182,28 +182,26 @@
          (sdl2:with-renderer (,renderer-symbol ,window-symbol :index ,index :flags ,renderer-flags)
            ,body-wrapped)))))
 
-;; NOT thread-safe!
-(let ((rect (sdl2:make-rect 0 0 0 0)))
-  (defun render-rectangle (renderer xy wh rgb &optional (filled t))
-    (plus-c:c-let ((rect sdl2-ffi:sdl-rect :from rect))
-      (setf (rect :x) (car xy)
-            (rect :y) (cdr xy)
-            (rect :w) (car wh)
-            (rect :h) (cdr wh)))
+(defun render-rectangle (renderer xy wh rgb &optional (filled t))
+  (let ((rect (sdl2:make-rect (car xy) (cdr xy) (car wh) (cdr wh))))
     (sdl2:set-render-draw-color renderer (nth 0 rgb) (nth 1 rgb) (nth 2 rgb) 255)
     (if filled
         (sdl2:render-fill-rect renderer rect)
-        (sdl2:render-draw-rect renderer rect))))
+        (sdl2:render-draw-rect renderer rect))
+    (sdl2:free-rect rect)))
 
-;; NOT thread-safe!
-(let ((rect (sdl2:make-rect 0 0 0 0)))
-  (defun render-texture (renderer texture x y)
-    (plus-c:c-let ((rect sdl2-ffi:sdl-rect :from rect))
-      (setf (rect :x) x
-            (rect :y) y
-            (rect :w) (sdl2:texture-width texture)
-            (rect :h) (sdl2:texture-height texture)))
-    (sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)))
+(defun render-texture (renderer texture x y)
+  (let ((rect (sdl2:make-rect x y (sdl2:texture-width texture) (sdl2:texture-height texture))))
+    (sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)
+    (sdl2:free-rect rect)))
+
+(defun render-text (renderer font text r g b a)
+  (let* ((surface (sdl2-ttf:render-utf8-solid font text r g b a))
+         (texture (sdl2:create-texture-from-surface renderer surface)))
+    ;; this is a bug, i think - causes memory corruption due to poorly-written finalizer if you call free-surface
+    ;; yes, it's a bug. sdl2:free-surface calls sdl2-ffi.functions:sdl-free-surface, which is called again when the object goes out of scope. this should be a bug report. investigate (try (TRACE sdl2::sdl-free-surface)) and report
+    ;;(sdl2:free-surface surface)
+    texture))
 
 (defmacro with-font ((font-sym path-to-font point-size) &body body)
   `(let ((,font-sym (sdl2-ttf:open-font ,path-to-font ,point-size)))
@@ -224,7 +222,4 @@
 
 (defun make-text-texture (renderer path-to-font point-size text r g b a)
   (with-font (font path-to-font point-size)
-    (let* ((surface (sdl2-ttf:render-utf8-solid font text r g b a))
-           (texture (sdl2:create-texture-from-surface renderer surface)))
-      (sdl2:free-surface surface)
-      texture)))
+    (render-text renderer font text r g b a)))

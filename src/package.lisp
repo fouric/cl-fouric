@@ -14,4 +14,10 @@
    #:render-rectangle
    #:render-texture
    #:with-font
+   #:clear-and-render
+   #:make-text-texture
+   #:render-text
+   #:clampf
+   #:inclampf
+   #:+-clamp
    ))

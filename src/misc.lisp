@@ -25,3 +25,19 @@
 
 (defun get-unix-time ()
   (universal-to-unix-time (get-universal-time)))
+
+(defmacro clampf (place min max)
+  `(progn
+     (if (< ,place ,min)
+         (setf ,place ,min))
+     (if (> ,place ,max)
+         (setf ,place ,max))))
+
+(defmacro inclampf (place delta min max)
+  `(progn
+     (incf ,place ,delta)
+     (clampf ,place ,min ,max)))
+
+(defun +-clamp (number delta min max)
+  (incf number delta)
+  (min max (max min number)))
