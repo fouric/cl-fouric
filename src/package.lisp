@@ -21,4 +21,6 @@
    #:inclampf
    #:+-clamp
    #:pushlast
+   #:with-accessors+
+   #:replace-texture
    ))

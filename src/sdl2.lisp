@@ -185,9 +185,10 @@
     (sdl2:free-rect rect)))
 
 (defun render-texture (renderer texture x y)
-  (let ((rect (sdl2:make-rect x y (sdl2:texture-width texture) (sdl2:texture-height texture))))
-    (sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)
-    (sdl2:free-rect rect)))
+  (when texture
+    (let ((rect (sdl2:make-rect x y (sdl2:texture-width texture) (sdl2:texture-height texture))))
+      (sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)
+      (sdl2:free-rect rect))))
 
 (defun render-text (renderer font text r g b a)
   (let* ((surface (sdl2-ttf:render-utf8-solid font text r g b a))
@@ -217,3 +218,10 @@
 (defun make-text-texture (renderer path-to-font point-size text r g b a)
   (with-font (font path-to-font point-size)
     (render-text renderer font text r g b a)))
+
+(defmacro replace-texture (place texture)
+  "peek at PLACE. if there's a texture, destroy and replace it with TEXTURE. warning: multiple evaluation of PLACE"
+  `(progn
+     (when ,place
+       (sdl2:destroy-texture ,place))
+     (setf ,place ,texture)))

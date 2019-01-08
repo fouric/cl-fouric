@@ -45,3 +45,7 @@
           (setf ,retval ,(first (last body)))
           ,@(mapcar ,destructor-form shader-init-forms)
           ,retval))))
+
+(defmacro with-accessors+ (slots instance &body body)
+  `(with-accessors (,@(loop :for slot :in slots :collect (if (consp slot) slot (list slot slot)))) ,instance
+     ,@body))

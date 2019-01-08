@@ -7,6 +7,7 @@
                     `(getf ,plist (quote ,var)))) vars)
      ,@body))
 
+;; TODO: use split-sequence
 (defmacro with-dot-accessors (type-mappings &body body)
   (labels
       ;; is the given symbol a candidate for transformation? that is, does it have exactly one . (dot) in it?
