@@ -23,4 +23,5 @@
    #:pushlast
    #:with-accessors+
    #:replace-texture
+   #:+whitespace-characters+
    ))

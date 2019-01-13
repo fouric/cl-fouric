@@ -18,6 +18,7 @@
                (:file "strings")
                (:file "misc")
                (:file "control-flow")
+               (:file "constants")
                (:file "sdl2"))
 
   :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof))

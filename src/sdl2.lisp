@@ -113,8 +113,6 @@
          ,@body))))
 
 ;;(sdl2:gl-set-swap-interval 1)
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (ql:quickload :sdl2))
 
 (defmacro make-accelerated-window-renderer (window-name renderer-name &rest body)
   `(sdl2:with-init (:everything)
