@@ -49,3 +49,7 @@
 (defmacro with-accessors+ (slots instance &body body)
   `(with-accessors (,@(loop :for slot :in slots :collect (if (consp slot) slot (list slot slot)))) ,instance
      ,@body))
+
+(defmacro define-constant (name value &optional doc)
+  `(defconstant ,name (if (boundp ',name) (symbol-value ',name) ,value)
+     ,@(when doc (list doc))))
