@@ -2,6 +2,7 @@
   (:use #:cl)
   (:export
    #:read-file
+   #:file-lines
    #:write-file
    #:with-init-window-gl
    #:profile
