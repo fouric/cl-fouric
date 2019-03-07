@@ -15,3 +15,13 @@
 (defmacro doitimes (count &body body)
   `(dotimes (,(gensym) ,(first count))
      ,@body))
+
+(defmacro intersperse (list binding always almost-always)
+  (a:once-only (list)
+    (a:with-gensyms (length i)
+      `(let ((,length (length ,list)))
+         (loop :for ,binding :in ,list :for ,i :from 0 :do
+           (progn
+             ,always
+             (unless (= ,i (1- ,length))
+               ,almost-always)))))))

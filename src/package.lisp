@@ -1,5 +1,6 @@
 (defpackage #:fouric
   (:use #:cl)
+  (:local-nicknames (:a :alexandria))
   (:export
    #:read-file
    #:file-lines
@@ -25,4 +26,8 @@
    #:with-accessors+
    #:replace-texture
    #:*whitespace-characters*
+   #:eql/package-relaxed
+   #:edit-definition
+   #:emacs-jump-to-term
+   #:intersperse
    ))

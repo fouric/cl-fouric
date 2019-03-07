@@ -21,4 +21,4 @@
                (:file "constants")
                (:file "sdl2"))
 
-  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof))
+  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria))
