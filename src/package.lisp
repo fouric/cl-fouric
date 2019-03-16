@@ -30,4 +30,6 @@
    #:edit-definition
    #:emacs-jump-to-term
    #:intersperse
+   #:unix-to-universal-time
+   #:update-swank
    ))

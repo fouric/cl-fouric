@@ -2,13 +2,6 @@
   ((once :accessor once :initform 1)
    (twice :accessor twice :initform 2)))
 
-(defun eql/package-relaxed (obj1 obj2)
-  (cond
-    ((eql obj1 obj2) t)
-    ((and (symbolp obj1) (symbolp obj2))
-     (string= (symbol-name obj1)
-              (symbol-name obj2)))))
-
 ;; need to parse lambda list and handle declare forms using https://common-lisp.net/project/alexandria/draft/alexandria.html#Macro-Writing
 ;; goal: when you pass in a parameter called SELF that specializes on a class, automatically break those out into with-accessors
 
