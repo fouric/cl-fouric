@@ -53,11 +53,11 @@
 ;; this is, ostensibly, useful for live-coding
 (defmacro udefun (name lambda-list update-code &body body)
   "like normal defun, except runs UPDATE-CODE whenever you redefine the function and then call it again"
-  (multiple-value-bind (body declarations docstring) (a:parse-body body :documentation t :whole 'udefun)
+  (multiple-value-bind (body declarations docstring) (alexandria:parse-body body :documentation t :whole 'udefun)
     `(defun ,name ,lambda-list
        ,@(list docstring)
        ,@declarations
-       (unless (eq (get ',name 'old-function-object) (if (fboundp ',name) (symbol-function ',name)))
-         ,update-code)
+       ,@(if update-code (list `(unless (eq (get ',name 'old-function-object) (if (fboundp ',name) (symbol-function ',name)))
+                                  ,update-code)))
        (setf (get ',name 'old-function-object) (symbol-function ',name))
        ,@body)))
