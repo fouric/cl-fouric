@@ -32,4 +32,5 @@
    #:intersperse
    #:unix-to-universal-time
    #:update-swank
+   #:udefun
    ))

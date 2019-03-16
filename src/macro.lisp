@@ -53,7 +53,7 @@
 ;; this is, ostensibly, useful for live-coding
 (defmacro udefun (name lambda-list update-code &body body)
   "like normal defun, except runs UPDATE-CODE whenever you redefine the function and then call it again"
-  (multiple-value-bind (body declarations docstring) (alexandria:parse-body body :documentation t :whole 'udefun)
+  (multiple-value-bind (body declarations docstring) (a:parse-body body :documentation t :whole 'udefun)
     `(defun ,name ,lambda-list
        ,@(list docstring)
        ,@declarations
