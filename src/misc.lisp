@@ -15,20 +15,6 @@
 (defmacro e (form)
   (eval form))
 
-;;; TODO: replace with https://github.com/ruricolist/serapeum/blob/a0b706d2c16ec6550a89e8958dbc9ed2f4a59761/REFERENCE.md
-
-(defvar *unix-epoch-difference*
-  (encode-universal-time 0 0 0 1 1 1970 0))
-
-(defun universal-to-unix-time (universal-time)
-  (- universal-time *unix-epoch-difference*))
-
-(defun unix-to-universal-time (unix-time)
-  (+ unix-time *unix-epoch-difference*))
-
-(defun get-unix-time ()
-  (universal-to-unix-time (get-universal-time)))
-
 (defmacro clampf (place min max)
   `(progn
      (if (< ,place ,min)
