@@ -6,6 +6,10 @@ Common Lisp utilities I use a lot. Check out [Alexandria](https://common-lisp.ne
 
 * cond? : modified cond that overrides default/T clause to return T if any clauses matches and NIL if it doesn't. use: saves you a bit of time for when you don't want to explicitly control the return value of every clause to make sure that the last value in a clause doesn't accidentally return NIL or something. todo: try to find and patch default/T clause instead of overriding it.
 
+* out : "debug printf" macro that prints out both all expressions given and their evaluations
+
+* udefun : augmented defun that allows you to run code when the given function is called after getting recompiled - useful for interactive development
+
 # undocumented things:
 
 * read-file
@@ -37,5 +41,3 @@ Common Lisp utilities I use a lot. Check out [Alexandria](https://common-lisp.ne
 * emacs-jump-to-term
 * intersperse
 * update-swank
-* udefun
-* cond?

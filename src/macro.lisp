@@ -69,3 +69,8 @@
        (not  (eq ,default (cond
                             ,@clauses
                             (t ,default)))))))
+
+(defmacro out (&rest expressions)
+  `(progn
+     ,@(loop :for exp :in expressions
+             :collect `(format t ,(concatenate 'string (format nil "~s" exp) ": ~s~%") ,exp))))
