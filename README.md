@@ -10,6 +10,8 @@ Common Lisp utilities I use a lot. Check out [Alexandria](https://common-lisp.ne
 
 * udefun : augmented defun that allows you to run code when the given function is called after getting recompiled - useful for interactive development
 
+* on-global-update : stores the last value of a global variable in its symbol-plist, and when that variable changes, runs the provided code - similar to udefun for globals
+
 # undocumented things:
 
 * read-file

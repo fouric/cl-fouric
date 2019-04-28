@@ -78,3 +78,11 @@
         `(let ((,e ,(first expressions)))
            (format t ,(concatenate 'string (format nil "~s" (first expressions)) ": ~s~%") ,e)
            ,e))))
+
+(defmacro on-global-update ((binding) &body body)
+  (a:with-gensyms (old-value)
+    `(a:if-let ((,old-value (get ',binding 'old-value)))
+       (unless (eq ,old-value ,binding)
+         (setf (get ',binding 'old-value) ,binding)
+         ,@body)
+       (setf (get ',binding 'old-value) ,binding))))
