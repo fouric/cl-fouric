@@ -21,6 +21,13 @@
                       :if-exists :supersede)
     (loop for line = (read-line in nil) while line collect (if filter (funcall filter line) line))))
 
+(defun write-lines (filename lines)
+  (with-open-file (out filename
+                      :direction :output
+                      :if-exists :supersede)
+    (dolist (line lines)
+      (format out "~a~%" line))))
+
 ;; just a shortcut for getting a thing from a place relative to a path
 (defun resource (path &optional system)
   (asdf:system-relative-pathname (if system system (intern (package-name *package*))) path))

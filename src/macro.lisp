@@ -79,6 +79,7 @@
            (format t ,(concatenate 'string (format nil "~s" (first expressions)) ": ~s~%") ,e)
            ,e))))
 
+;; TODO: extend to handle multiple bindings
 (defmacro on-global-update ((binding) &body body)
   (a:with-gensyms (old-value)
     `(a:if-let ((,old-value (get ',binding 'old-value)))

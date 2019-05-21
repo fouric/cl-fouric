@@ -4,6 +4,7 @@
   (:export
    #:read-file
    #:file-lines
+   #:write-lines
    #:write-file
    #:with-init-window-gl
    #:profile
