@@ -37,4 +37,6 @@
    #:cond?
    #:out
    #:on-global-update
+   #:nmember
+   #:nonconsecutive-substring-match
    ))
