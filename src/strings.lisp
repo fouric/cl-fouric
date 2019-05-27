@@ -18,5 +18,5 @@
                  0
                  (multiple-value-bind (rest pos) (nmember (first term) item)
                    (when rest
-                     (+ pos (rec (rest term) (rest item))))))))
+                     (+ pos (or (rec (rest term) (rest item)) 0)))))))
     (rec (coerce term 'list) (coerce item 'list))))

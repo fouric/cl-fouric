@@ -15,6 +15,7 @@
                (:file "io")
                (:file "macro")
                (:file "object-access")
+               (:file "cons")
                (:file "strings")
                (:file "misc")
                (:file "control-flow")
