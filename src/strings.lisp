@@ -12,12 +12,12 @@
 (defun symcat (first &rest others)
   (intern (string-upcase (apply 'strcat first others))))
 
-(defun nonconsecutive-substring-match (term item)
-  (labels ((rec (term item)
-             (if (not term)
+(defun nonconsecutive-substring-match (needle haystack)
+  (labels ((rec (needle haystack)
+             (if (not needle)
                  0
-                 (multiple-value-bind (rest pos) (nmember (first term) item)
+                 (multiple-value-bind (rest pos) (nmember (first needle) haystack)
                    (when rest
-                     (a:when-let ((rec (rec (rest term) (rest item))))
+                     (a:when-let ((rec (rec (rest needle) (rest rest))))
                        (+ pos rec)))))))
-    (rec (coerce term 'list) (coerce item 'list))))
+    (rec (coerce needle 'list) (coerce haystack'list))))
