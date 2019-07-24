@@ -13,6 +13,8 @@
          ,@body)
       (first body)))
 
+;;; TODO: use UNWIND-PROTECT for cleanup code and maybe ONCE-ONLY for gensyms
+
 (defmacro make-alpha-with-macro (macro-name constructor destructor)
   "creates a macro that accepts an ARG and calls (CONSTRUCTOR ARG) and (DESTRUCTOR ARG)"
   ` (defmacro ,macro-name ((name args) &body body)

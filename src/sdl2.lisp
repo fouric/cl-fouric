@@ -1,9 +1,10 @@
 (in-package #:fouric)
 
 (defmacro with-ttf-init (&body body)
-  `(progn
-     (sdl2-ttf:init)
-     ,@body
+  `(unwind-protect
+        (progn
+          (sdl2-ttf:init)
+          ,@body)
      (sdl2-ttf:quit)))
 
 (defun font (name size)
@@ -128,7 +129,7 @@
     (sdl2:with-event-loop (:method :poll)
       (:keydown (:keysym ,keysym-name)
                 (if ,keysym-quit-trigger
-                    (sdl2:push-event :quit)))
+                  (sdl2:push-event :quit)))
       (:idle ()
              (sdl2:set-render-draw-color ,renderer-name 0 0 0 255)
              (sdl2:render-clear ,renderer-name)
@@ -178,8 +179,8 @@
   (let ((rect (sdl2:make-rect (car xy) (cdr xy) (car wh) (cdr wh))))
     (sdl2:set-render-draw-color renderer (nth 0 rgb) (nth 1 rgb) (nth 2 rgb) 255)
     (if filled
-        (sdl2:render-fill-rect renderer rect)
-        (sdl2:render-draw-rect renderer rect))
+      (sdl2:render-fill-rect renderer rect)
+      (sdl2:render-draw-rect renderer rect))
     (sdl2:free-rect rect)))
 
 (defun render-texture (renderer texture x y)
@@ -219,6 +220,7 @@
 
 (defmacro replace-texture (place texture)
   "peek at PLACE. if there's a texture, destroy and replace it with TEXTURE. warning: multiple evaluation of PLACE"
+  ;; FIXME: rename to ENSURE-TEXTURE?
   `(progn
      (when ,place
        (sdl2:destroy-texture ,place))
