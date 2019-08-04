@@ -39,4 +39,5 @@
    #:on-global-update
    #:nmember
    #:nonconsecutive-substring-match
+   #:emacs-eval
    ))
