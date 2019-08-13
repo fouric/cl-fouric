@@ -23,6 +23,4 @@
     (rec (coerce needle 'list) (coerce haystack'list))))
 
 (defun genspaces (count)
-  (if (zerop count)
-      ""
-      (concatenate 'string " " (genspaces (1- count)))))
+  (make-string (max 0 count) :initial-element #\space))
