@@ -40,4 +40,5 @@
    #:nmember
    #:nonconsecutive-substring-match
    #:emacs-eval
+   #:genspaces
    ))

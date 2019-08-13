@@ -21,3 +21,8 @@
                      (a:when-let ((rec (rec (rest needle) (rest rest))))
                        (+ pos rec)))))))
     (rec (coerce needle 'list) (coerce haystack'list))))
+
+(defun genspaces (count)
+  (if (zerop count)
+      ""
+      (concatenate 'string " " (genspaces (1- count)))))
