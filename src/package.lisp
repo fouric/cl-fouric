@@ -44,6 +44,7 @@
 
    ;; charms
    #:init-charms
+   #:update-charms-dimensions
    #:clear-window
    #:refresh-window
    #:get-char
@@ -54,4 +55,7 @@
    #:init-charms
    #:with-charms
    #:update-charms-dimensions
+   #:+color-white-black+
+   #:+color-black-white+
+   #:+color-black-black+
    ))

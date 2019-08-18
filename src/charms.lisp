@@ -1,5 +1,9 @@
 (in-package #:fouric)
 
+(defparameter *charms-win* nil)
+(defparameter *screen-width* 1)
+(defparameter *screen-height* 1)
+
 (defun clamp-w (x)
   (a:clamp x 0 *screen-width*))
 (defun clamp-h (y)
