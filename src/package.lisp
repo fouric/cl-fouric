@@ -41,4 +41,17 @@
    #:nonconsecutive-substring-match
    #:emacs-eval
    #:genspaces
+
+   ;; charms
+   #:init-charms
+   #:clear-window
+   #:refresh-window
+   #:get-char
+   #:clamp-w
+   #:clamp-h
+   #:with-color
+   #:write-string-at
+   #:init-charms
+   #:with-charms
+   #:update-charms-dimensions
    ))
