@@ -43,6 +43,7 @@
    #:genspaces
 
    ;; charms
+   #:with-charms
    #:init-charms
    #:update-charms-dimensions
    #:clear-window
@@ -58,4 +59,6 @@
    #:+color-white-black+
    #:+color-black-white+
    #:+color-black-black+
+   #:*screen-width*
+   #:*screen-height*
    ))

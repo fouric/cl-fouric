@@ -55,8 +55,8 @@
       (charms:enable-raw-input :interpret-control-characters interpret-control-characters)
       (charms:disable-raw-input)))
 
-(defun clear-window ()
-  (charms:clear-window *charms-win*))
+(defun clear-window (&optional force-repaint)
+  (charms:clear-window *charms-win* :force-repaint force-repaint))
 
 (defun refresh-window ()
   (charms:refresh-window *charms-win*))
