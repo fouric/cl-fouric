@@ -27,10 +27,11 @@
 
 ;; TODO: add special case for writing to the character in the lower-right-hand corner of the screen, or otherwise figure out what the heck is going on
 (defun write-string-at (string x y &optional colors)
-  (if colors
+  (if (< y *screen-height*)
+    (if colors
       (with-color colors
         (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
-      (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
+      (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y))))
   (length string))
 
 (defcolors
