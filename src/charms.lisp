@@ -1,5 +1,9 @@
 (in-package #:fouric)
 
+;; is this OK?
+(eval-when (:compile-toplevel :load-toplevel)
+  (trivial-indent:define-indentation defcolors (2)))
+
 (defparameter *charms-win* nil)
 (defparameter *screen-width* 1)
 (defparameter *screen-height* 1)
@@ -28,16 +32,16 @@
 ;; TODO: add special case for writing to the character in the lower-right-hand corner of the screen, or otherwise figure out what the heck is going on
 (defun write-string-at (string x y &optional colors)
   (if (< y *screen-height*)
-    (if colors
-      (with-color colors
-        (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
-      (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y))))
+      (if colors
+          (with-color colors
+            (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
+          (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y))))
   (length string))
 
 (defcolors
-    ;; need some way of, when this is recompiled, patching it into running instance
-    (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
-    (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
+  ;; need some way of, when this is recompiled, patching it into running instance
+  (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
+  (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
 
   (+color-black-black+  charms/ll:COLOR_BLACK charms/ll:COLOR_BLACK))
 
