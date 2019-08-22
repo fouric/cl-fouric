@@ -23,4 +23,4 @@
                (:file "charms")
                (:file "sdl2"))
 
-  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria :trivial-indent))
+  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria :trivial-indent :cl-charms))
