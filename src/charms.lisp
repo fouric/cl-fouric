@@ -69,15 +69,16 @@
 (defun get-char ()
   (charms:get-char *charms-win* :ignore-error t))
 
-(defmacro with-charms ((&key (timeout 100) (color nil) (raw-input t) (interpret-control-characters t)) &body body)
-  `(unwind-protect
-        (progn
-          (init-charms ,timeout ,color ,raw-input ,interpret-control-characters)
-          ,@body)
-     (charms:finalize)))
-
 (defun update-charms-dimensions ()
   (multiple-value-bind (width height) (charms:window-dimensions *charms-win*)
     (setf *screen-width* (1- width)
           ;; ok so this is monumentally stupid BUT you apparently can't write to the cell in the very bottom right-hand corner without causing an error in charms...
           *screen-height* height)))
+
+(defmacro with-charms ((&key (timeout 100) (color nil) (raw-input t) (interpret-control-characters t)) &body body)
+  `(unwind-protect
+        (progn
+          (init-charms ,timeout ,color ,raw-input ,interpret-control-characters)
+          (update-charms-dimensions)
+          ,@body)
+     (charms:finalize)))
