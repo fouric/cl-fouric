@@ -61,4 +61,10 @@
    #:+color-black-black+
    #:*screen-width*
    #:*screen-height*
+
+   ;; narrower
+   #:make-narrower
+   #:criteria
+   #:candidates
+   #:results
    ))
