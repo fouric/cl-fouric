@@ -39,7 +39,8 @@
   (length string))
 
 (defcolors
-  ;; need some way of, when this is recompiled, patching it into running instance
+  ;; TODO: need some way of, when this is recompiled, patching it into running instance
+  ;; https://linux.die.net/man/3/init_pair probably keep the assignments, diff versions, and call charms/ll:init-pair
   (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
   (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
 
