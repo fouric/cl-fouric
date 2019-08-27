@@ -58,6 +58,8 @@
    #:update-charms-dimensions
    #:+color-white-black+
    #:+color-black-white+
+   #:+color-blue-black+
+   #:+color-black-blue+
    #:+color-black-black+
    #:*screen-width*
    #:*screen-height*

@@ -43,6 +43,9 @@
   (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
   (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
 
+  (+color-blue-black+  charms/ll:COLOR_BLUE   charms/ll:COLOR_BLACK)
+  (+color-blue-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_BLUE)
+
   (+color-black-black+  charms/ll:COLOR_BLACK charms/ll:COLOR_BLACK))
 
 (defun init-charms (timeout color raw-input interpret-control-characters)
@@ -76,6 +79,7 @@
           *screen-height* height)))
 
 (defmacro with-charms ((&key (timeout 100) (color nil) (raw-input t) (interpret-control-characters t)) &body body)
+  ;; TODO: if we change parameters, live reload
   `(unwind-protect
         (progn
           (init-charms ,timeout ,color ,raw-input ,interpret-control-characters)
