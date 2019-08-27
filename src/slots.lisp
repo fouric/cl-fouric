@@ -24,8 +24,7 @@
          (body (if slots
                    `((f:with-accessors+ ,slots ,(first pair) ,@body))
                    body)))
-    (fresh-line)
-    (format t "args: ~s~%" args)
+    (format t "~&args: ~s~%" args)
     (format t "name: ~s~%" name)
     (format t "qualifier?: ~s~%" qualifier?)
     (format t "method-qualifier: ~s~%" method-qualifier)
