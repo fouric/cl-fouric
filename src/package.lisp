@@ -63,6 +63,7 @@
    #:+color-black-black+
    #:*screen-width*
    #:*screen-height*
+   #:charms-draw-box
 
    ;; narrower
    #:make-narrower
