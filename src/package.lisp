@@ -64,6 +64,7 @@
    #:*screen-width*
    #:*screen-height*
    #:charms-draw-box
+   #:window-dimensions
 
    ;; narrower
    #:make-narrower

@@ -88,6 +88,11 @@
           ,@body)
      (charms:finalize)))
 
+(defun repeatchar (char count)
+  (if (zerop count)
+      ""
+      (concatenate 'string (list char) (repeatchar char (1- count)))))
+
 (defun charms-draw-box (x y w h &optional (fancy t))
   ;; usually takes no more than a few hundred microseconds per call, although the complexity does scale with the box size
   ;; make a string of entirely the horizontal line character, w units long
@@ -96,7 +101,7 @@
         (lower-left (if fancy #\box_drawings_light_up_and_right #\+))
         (lower-right (if fancy #\box_drawings_light_up_and_left #\+))
         (vertical (if fancy "│" "|"))
-        (horizontal (make-string w :initial-element #\BOX_DRAWINGS_LIGHT_HORIZONTAL)))
+        (horizontal (make-string w :initial-element (if fancy #\BOX_DRAWINGS_LIGHT_HORIZONTAL #\-))))
     ;; set the first and last elements to be the upper left and right corners, respectively
     (setf (aref horizontal 0) upper-left
           (aref horizontal (1- w)) upper-right)
@@ -111,3 +116,6 @@
     (dotimes (i (- h 2))
       (write-string-at vertical (+ x 0) (+ y i 1))
       (write-string-at vertical (+ x w -1) (+ y i 1)))))
+
+(defun window-dimensions ()
+  (charms:window-dimensions *charms-win*))
