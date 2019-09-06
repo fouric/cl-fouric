@@ -13,7 +13,7 @@
     (print object out)))
 
 (defun file-lines (filename &optional filter)
-  "read in the named file into a list of strings, one per line, and optionall call FILTER on each line"
+  "read in the named file into a list of strings, one per line, and optionally call FILTER on each line"
   (with-open-file (in filename
                       :direction :input
                       :if-exists :supersede)
