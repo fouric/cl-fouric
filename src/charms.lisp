@@ -50,6 +50,7 @@
   (+color-black-black+  charms/ll:COLOR_BLACK charms/ll:COLOR_BLACK))
 
 (defun init-charms (timeout color raw-input interpret-control-characters)
+  ;; TODO: if recompiled while running, if raw-input or interpret-control-characters have changed, call enable-raw-input or disable-raw-input to sync state
   (force-output *terminal-io*)
   (charms:initialize)
   ;; timeout set in milliseconds
