@@ -32,17 +32,17 @@
 ;; TODO: add special case for writing to the character in the lower-right-hand corner of the screen, or otherwise figure out what the heck is going on
 (defun write-string-at (string x y &optional colors)
   (if (< y *screen-height*)
-      (if colors
-          (with-color colors
-            (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
-          (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y))))
+    (if colors
+      (with-color colors
+        (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y)))
+      (charms:write-string-at-point *charms-win* (subseq string 0 (- (clamp-w (+ (length string) x)) x)) (clamp-w x) (clamp-h y))))
   (length string))
 
 (defcolors
-  ;; TODO: need some way of, when this is recompiled, patching it into running instance
-  ;; https://linux.die.net/man/3/init_pair probably keep the assignments, diff versions, and call charms/ll:init-pair
-  (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
-  (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
+    ;; TODO: need some way of, when this is recompiled, patching it into running instance
+    ;; https://linux.die.net/man/3/init_pair probably keep the assignments, diff versions, and call charms/ll:init-pair
+    (+color-white-black+  charms/ll:COLOR_WHITE   charms/ll:COLOR_BLACK)
+    (+color-black-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_WHITE)
 
   (+color-blue-black+  charms/ll:COLOR_BLUE   charms/ll:COLOR_BLACK)
   (+color-blue-white+  charms/ll:COLOR_BLACK charms/ll:COLOR_BLUE)
@@ -62,8 +62,8 @@
     (charms/ll:start-color)
     (init-colors))
   (if raw-input
-      (charms:enable-raw-input :interpret-control-characters interpret-control-characters)
-      (charms:disable-raw-input)))
+    (charms:enable-raw-input :interpret-control-characters interpret-control-characters)
+    (charms:disable-raw-input)))
 
 (defun clear-window (&optional force-repaint)
   (charms:clear-window *charms-win* :force-repaint force-repaint))
@@ -91,18 +91,20 @@
 
 (defun repeatchar (char count)
   (if (zerop count)
-      ""
-      (concatenate 'string (list char) (repeatchar char (1- count)))))
+    ""
+    (concatenate 'string (list char) (repeatchar char (1- count)))))
 
 (defun charms-draw-box (x y w h &optional (fancy t))
   ;; usually takes no more than a few hundred microseconds per call, although the complexity does scale with the box size
-  ;; make a string of entirely the horizontal line character, w units long
-  (let ((upper-left (if fancy #\box_drawings_light_down_and_right #\+))
-        (upper-right (if fancy #\box_drawings_light_down_and_left #\+))
-        (lower-left (if fancy #\box_drawings_light_up_and_right #\+))
-        (lower-right (if fancy #\box_drawings_light_up_and_left #\+))
-        (vertical (if fancy "│" "|"))
-        (horizontal (make-string w :initial-element (if fancy #\BOX_DRAWINGS_LIGHT_HORIZONTAL #\-))))
+  (let* ((w (min w (- *screen-width* x)))
+         (h (min h (- *screen-height* y)))
+         ;; make a string of entirely the horizontal line character, w units long
+         (upper-left (if fancy #\box_drawings_light_down_and_right #\+))
+         (upper-right (if fancy #\box_drawings_light_down_and_left #\+))
+         (lower-left (if fancy #\box_drawings_light_up_and_right #\+))
+         (lower-right (if fancy #\box_drawings_light_up_and_left #\+))
+         (vertical (if fancy "│" "|"))
+         (horizontal (make-string w :initial-element (if fancy #\BOX_DRAWINGS_LIGHT_HORIZONTAL #\-))))
     ;; set the first and last elements to be the upper left and right corners, respectively
     (setf (aref horizontal 0) upper-left
           (aref horizontal (1- w)) upper-right)
