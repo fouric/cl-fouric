@@ -73,6 +73,7 @@
                             (t ,default)))))))
 
 (defmacro out (&rest expressions)
+  ;; FIXME: breaks when you try to wrap a FORMAT expression
   (if (< 1 (length expressions))
       `(progn ,@(loop :for exp :in expressions
                       :collect `(format t ,(concatenate 'string (format nil "~s" exp) ": ~s~%") ,exp)))
