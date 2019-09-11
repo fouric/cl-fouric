@@ -48,15 +48,24 @@
 (defun emacs-jump-to-term (term &optional (path "."))
   (trivial-shell:shell-command (format nil "emacsclient -n +$(grep -HnR '~a' ~a/* | head -n 1 | cut -d : -f 2) $(grep -HnR '~a' ~a/* | head -n 1 | cut -d : -f 1)" term path term path)))
 
+(defun convert-symbols (tree)
+  (cond
+    ((symbolp tree)
+     (intern (string-upcase (string tree))))
+    ((listp tree)
+     (mapcar #'convert-symbols tree))
+    (t
+     tree)))
+
 (defun emacs-eval (command &optional eval-in-emacs)
   "attempt to call out to emacs to evaluate code. EVAL-IN-EMACS requires slime-enable-evaluate-in-emacs to be set to t in your emacs. COMMAND can be a string or a list. strings might break for eval-in-emacs => nil, and lists might break for eval-in-emacs => t"
   ;; FIXME: maybe should just use swank-client (http://quickdocs.org/swank-client/) to talk to development environment...
   (if eval-in-emacs
-      (let ((command (if (listp command)
-                         command
-                         (read-from-string (string-upcase command)))))
+      (let ((command (convert-symbols (if (listp command)
+                                          command
+                                          (read-from-string (string-upcase command))))))
         (swank:eval-in-emacs command))
       (let ((command (if (stringp command)
                          command
-                         (string-downcase (format nil "~s" command)))))
+                         (string-downcase (format nil "~s" (convert-symbols command))))))
         (trivial-shell:shell-command (format nil "emacsclient --eval \"~a\"" command)))))
