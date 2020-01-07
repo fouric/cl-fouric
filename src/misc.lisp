@@ -3,7 +3,7 @@
 (defmacro print-call (call)
   `(format t "~s => ~s~%" ',call ,call))
 
-(defmacro profile (&rest packages)
+(defmacro prof (&rest packages)
   `(sb-profile:profile ,@(mapcar (lambda (x) (string-upcase (if (and (consp x) (eq (first x) 'quote)) (cadr x) x))) packages)))
 
 ;; takes about 12 microseconds per call, FYI

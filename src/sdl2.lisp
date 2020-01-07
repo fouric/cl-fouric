@@ -225,3 +225,68 @@
      (when ,place
        (sdl2:destroy-texture ,place))
      (setf ,place ,texture)))
+
+(defmacro sdl2-event-process ((event recursion-name quit-symbol (&rest args)) &body event-handlers)
+  (alexandria:with-gensyms (event-type event-id)
+    `(sdl2:with-sdl-event (,event)
+       (let )
+       (if (not (zerop (sdl2:next-event ,event :poll nil)))
+           (let* ((,event-type (sdl2:get-event-type ,event))
+                  (,event-id (and (sdl2::user-event-type-p ,event-type) (,event :user :code))))
+             (case ,event-type
+               (:lisp-message ()
+                (sdl2::get-and-handle-messages))
+               ,@(loop :for (type params . forms) :in event-handlers
+                       :collect
+                       (if (eq type :quit)
+                           `(:quit ,@forms)
+                           #++(sdl2::expand-quit-handler event forms quit)
+                           (sdl2::expand-handler event type params forms))
+                         :into results
+                       :finally (return (remove nil results))))
+             (when (and ,event-id (not (eq ,event-type :lisp-message)))
+               (sdl2::free-user-data ,event-id))
+             (,recursion-name ,quit-symbol ,@args))
+           ,quit-symbol))))
+
+(defmacro sdl2-event-recursion (() &body body)
+  `(unless sdl2::*event-loop*
+     (setf sdl2::*event-loop* t)
+     (sdl2:in-main-thread (:background nil)
+       (unwind-protect
+            (progn
+              ,@body)
+         (setf sdl2::*event-loop* nil)))))
+
+#| use like so:
+
+(defun gooey ()
+  (sdl2:with-init (:everything)
+    (sdl2:with-window (window :w 400 :h 400)
+      (sdl2:with-renderer (renderer window)
+        (sdl2-event-recursion ()
+          (process-next-loop renderer))))))
+
+(defun idle-function (renderer)
+  (sdl2:set-render-draw-color renderer 255 255 255 255)
+  (sdl2:render-clear renderer)
+  (sdl2:render-present renderer))
+
+(defun quit-function ()
+  t)
+
+(defun process-next-loop (renderer)
+  (unless (process-next-event renderer nil) ;; blocks until we've processed all events, and returns non-nil if we want to quit
+    (idle-function renderer)
+    (process-next-loop renderer)))
+
+(defun process-next-event (renderer quit?)
+  (sdl2-event-process (event)
+    (:keydown (:keysym keysym)
+              (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
+                (sdl2:push-event :quit)))
+    (:idle ()
+           (idle-function renderer))
+    (:quit ()
+           (setf quit? (quit-function)))))
+|#

@@ -7,19 +7,11 @@
    #:write-lines
    #:write-file
    #:with-init-window-gl
-   #:profile
+   #:prof
    #:resource
    #:doitimes
    #:while
    #:fn-case
-   #:sdl2-omni
-   #:with-ttf-init
-   #:render-rectangle
-   #:render-texture
-   #:with-font
-   #:clear-and-render
-   #:make-text-texture
-   #:render-text
    #:clampf
    #:inclampf
    #:+-clamp
@@ -47,6 +39,7 @@
    #:init-charms
    #:update-charms-dimensions
    #:clear-window
+   #:write-spaces-window
    #:refresh-window
    #:get-char
    #:clamp-w
@@ -71,4 +64,16 @@
    #:criteria
    #:candidates
    #:results
+
+   ;; sdl2
+   #:sdl2-omni
+   #:with-ttf-init
+   #:render-rectangle
+   #:render-texture
+   #:with-font
+   #:clear-and-render
+   #:make-text-texture
+   #:render-text
+   #:sdl2-event-process
+   #:sdl2-event-recursion
    ))

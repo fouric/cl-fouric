@@ -68,6 +68,15 @@
 (defun clear-window (&optional force-repaint)
   (charms:clear-window *charms-win* :force-repaint force-repaint))
 
+(defun write-spaces-window ()
+  "write the space character to every cell on the screen to forcibly clear it if curses doesn't want to cooperate"
+  (multiple-value-bind (width height) (window-dimensions)
+    (with-color +color-black-black+
+      (clear-window)
+      (dotimes (y height)
+        (charms:write-string-at-point *charms-win* (make-string (if (= y (1- height)) (1- width) width) :initial-element #\space) 0 y))
+      (refresh-window))))
+
 (defun refresh-window ()
   (charms:refresh-window *charms-win*))
 
