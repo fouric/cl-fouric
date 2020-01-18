@@ -67,6 +67,7 @@
 
    ;; sdl2
    #:sdl2-omni
+   #:sdl2-quick
    #:with-ttf-init
    #:render-rectangle
    #:render-texture

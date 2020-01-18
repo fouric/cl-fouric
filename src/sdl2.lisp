@@ -129,7 +129,7 @@
     (sdl2:with-event-loop (:method :poll)
       (:keydown (:keysym ,keysym-name)
                 (if ,keysym-quit-trigger
-                  (sdl2:push-event :quit)))
+                    (sdl2:push-event :quit)))
       (:idle ()
              (sdl2:set-render-draw-color ,renderer-name 0 0 0 255)
              (sdl2:render-clear ,renderer-name)
@@ -175,12 +175,22 @@
             (sdl2:with-event-loop (,@sdl-with-event-loop-flags)
               ,@raw-event-forms)))))))
 
+;; convenience macro to make it WAY easier for my most common case
+(defmacro sdl2-quick ((window-symbol renderer-symbol &key title (x :centered) (y :centered) (w 800) (h 600) window-flags extras)
+                      &body body)
+  `(sdl2-omni ((:video)
+               (,window-symbol :title ,title :x ,x :y ,y :w ,w :h ,h :window-flags ,window-flags)
+               (,renderer-symbol :renderer-flags '(:accelerated :presentvsync))
+               (:method :poll)
+               ,extras)
+     ,@body))
+
 (defun render-rectangle (renderer xy wh rgb &optional (filled t))
   (let ((rect (sdl2:make-rect (car xy) (cdr xy) (car wh) (cdr wh))))
     (sdl2:set-render-draw-color renderer (nth 0 rgb) (nth 1 rgb) (nth 2 rgb) 255)
     (if filled
-      (sdl2:render-fill-rect renderer rect)
-      (sdl2:render-draw-rect renderer rect))
+        (sdl2:render-fill-rect renderer rect)
+        (sdl2:render-draw-rect renderer rect))
     (sdl2:free-rect rect)))
 
 (defun render-texture (renderer texture x y)
@@ -261,32 +271,32 @@
 #| use like so:
 
 (defun gooey ()
-  (sdl2:with-init (:everything)
-    (sdl2:with-window (window :w 400 :h 400)
-      (sdl2:with-renderer (renderer window)
-        (sdl2-event-recursion ()
-          (process-next-loop renderer))))))
+(sdl2:with-init (:everything)
+(sdl2:with-window (window :w 400 :h 400)
+(sdl2:with-renderer (renderer window)
+(sdl2-event-recursion ()
+(process-next-loop renderer))))))
 
 (defun idle-function (renderer)
-  (sdl2:set-render-draw-color renderer 255 255 255 255)
-  (sdl2:render-clear renderer)
-  (sdl2:render-present renderer))
+(sdl2:set-render-draw-color renderer 255 255 255 255)
+(sdl2:render-clear renderer)
+(sdl2:render-present renderer))
 
 (defun quit-function ()
-  t)
+t)
 
 (defun process-next-loop (renderer)
-  (unless (process-next-event renderer nil) ;; blocks until we've processed all events, and returns non-nil if we want to quit
-    (idle-function renderer)
-    (process-next-loop renderer)))
+(unless (process-next-event renderer nil) ;; blocks until we've processed all events, and returns non-nil if we want to quit
+(idle-function renderer)
+(process-next-loop renderer)))
 
 (defun process-next-event (renderer quit?)
-  (sdl2-event-process (event)
-    (:keydown (:keysym keysym)
-              (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
-                (sdl2:push-event :quit)))
-    (:idle ()
-           (idle-function renderer))
-    (:quit ()
-           (setf quit? (quit-function)))))
+(sdl2-event-process (event)
+(:keydown (:keysym keysym)
+(when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
+(sdl2:push-event :quit)))
+(:idle ()
+(idle-function renderer))
+(:quit ()
+(setf quit? (quit-function)))))
 |#
