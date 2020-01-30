@@ -11,7 +11,7 @@
    (spyglass :accessor spyglass :initarg :spyglass)
    (cache :accessor cache :initarg :cache)))
 
-;; use like (narrow '("foo" "bar" "baz") "a" (lambda (x) x) #'nonconsecutive-substring-match)
+;; use like (narrow '("foo" "bar" "baz") "a" #'identity #'nonconsecutive-substring-match)
 (defun narrow (haystack needle key spyglass)
   ;; "haystack" is a LIST of the same type as STRAW, that will be searched through
   ;; "needle" is a single object, that is used to search through the haystack
@@ -41,8 +41,21 @@
   (narrow-mutate self))
 
 (defmethod needle-append ((self narrower) character)
-  (setf (needle self) (concatenate 'string (needle self) (coerce (list character) 'string)))
-  (narrow-mutate self)
+  (with-accessors+ (cache key-function spyglass) self
+    (let* ((old-needle (needle self))
+           (new-needle (concatenate 'string old-needle (coerce (list character) 'string)))
+           (cached-results (gethash old-needle cache 'uncached)))
+      (setf (results self) (if (eq cached-results 'uncached)
+                               (let* ((last-level-cache (if (string= old-needle "")
+                                                            (haystack self)
+                                                            (ensure-gethash old-needle cache (narrow (haystack self) old-needle key-function spyglass))))
+                                      (results (narrow last-level-cache new-needle key-function spyglass)))
+                                 (format t "generated new cache value for ~s~%" new-needle)
+                                 (setf (gethash (needle self) cache) results))
+                               (progn
+                                 (format t "used cache value for ~s~%" new-needle)
+                                 cached-results))
+            (needle self) new-needle)))
   (format t "results: ~s~%" (results self)))
 (defmethod needle-backspace ((self narrower))
   (setf (needle self) (subseq (needle self) 0 (max 0 (1- (length (needle self))))))
@@ -60,7 +73,7 @@
   (let ((obj (make-instance 'narrower
                             :haystack haystack
                             :needle (or needle "")
-                            :key-function (or key (lambda (x) x))
+                            :key-function (or key #'identity)
                             :spyglass (or filter #'nonconsecutive-substring-match)
                             :result-hooks hooks
                             :cache (make-hash-table :test 'equal))))

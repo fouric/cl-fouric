@@ -72,3 +72,13 @@
 
 (defun command (control-string &rest format-arguments)
   (trivial-shell:shell-command (apply #'format nil control-string format-arguments)))
+
+(defmacro ensure-gethash (key hash-table &body value-generation-body)
+  (a:with-gensyms (default result)
+    (a:once-only (key hash-table)
+      `(let* ((,default (gensym))
+             (,result (gethash ,key ,hash-table ,default)))
+         (if (eq ,result ,default)
+             (setf (gethash ,key ,hash-table) (progn
+                                                ,@value-generation-body))
+             ,result)))))

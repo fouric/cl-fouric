@@ -80,4 +80,5 @@
 
    ;; misc
    #:command
+   #:ensure-gethash
    ))
