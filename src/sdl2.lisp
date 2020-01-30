@@ -68,7 +68,7 @@
           (multiple-value-bind (window-width window-height)
               (sdl2:get-window-size window)
             (format t "~s~%" (cons window-width window-height))
-            (let* ((font (font "UbuntuMono-R.ttf" 36))
+            (let* ((font (sdl2-ttf:open-font (fouric:resource "fonts/UbuntuMono-R.ttf" 'gooey) 36))
                    (surface (sdl2-ttf:render-text-blended font " " 200 0 200 255))
                    (texture (sdl2:create-texture-from-surface renderer surface)))
               (setf *character-width* (sdl2:texture-width texture)

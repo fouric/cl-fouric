@@ -1,31 +1,70 @@
 (in-package #:fouric)
 
+;; only a text narrower for now!
+
 (defclass narrower ()
-  ((candidates :accessor candidates :initarg :candidates)
-   (criteria :accessor criteria :initarg :criteria)
+  ((haystack :accessor haystack :initarg :haystack)
+   (needle :accessor needle :initarg :needle)
    (results :accessor results :initarg :results)
-   (hook-list :accessor hook-list :initarg :hook-list)
+   (result-hooks :accessor result-hooks :initarg :result-hooks)
    (key-function :accessor key-function :initarg :key-function)
-   (filter-function :accessor filter-function :initarg :filter-function)))
+   (spyglass :accessor spyglass :initarg :spyglass)
+   (cache :accessor cache :initarg :cache)))
 
-;; use like (narrow '("foo" "bar" "baz") "a" nil #'search)
-(defun narrow (candidates criteria &optional (key (lambda (x) x)) (filter #'eq))
-  (remove-if-not (lambda (item) (funcall filter criteria item)) candidates :key key))
+;; use like (narrow '("foo" "bar" "baz") "a" (lambda (x) x) #'nonconsecutive-substring-match)
+(defun narrow (haystack needle key spyglass)
+  ;; "haystack" is a LIST of the same type as STRAW, that will be searched through
+  ;; "needle" is a single object, that is used to search through the haystack
+  ;; "key" is a function object taking a single item of same type as STRAW and returning the actual data that will be used to filter (which has same type as NEEDLE)
+  (mapcar #'cdr (sort (remove-if-not #'car (loop :for straw :in haystack :collect (cons (funcall spyglass needle (funcall key straw)) straw)))
+                      (lambda (first second)
+                        (< (car first)
+                           (car second))))))
 
-(defmethod (setf candidates) :after (value (self narrower))
-  (setf (results self) (narrow (candidates self) (criteria self) (key-function self) (filter-function self))))
-(defmethod (setf criteria) :after (value (self narrower))
-  (setf (results self) (narrow (candidates self) (criteria self) (key-function self) (filter-function self))))
+;; should probably just move logic into needle-append and needle-backspace
+(defun narrow-mutate (narrower)
+  (let* ((default (gensym))
+         (cache (gethash (needle narrower) (cache narrower) default)))
+    (setf (results narrower) (if (eq cache default)
+                                 (let ((narrowed (narrow-object narrower)))
+                                   (format t "generated new cache value for ~s~%" (needle narrower))
+                                   (setf (gethash (needle narrower) (cache narrower)) narrowed)
+                                   narrowed)
+                                 (progn
+                                   (format t "used cache value for ~s~%" (needle narrower))
+                                   cache)))))
+(defun narrow-object (narrower)
+  (narrow (haystack narrower) (needle narrower) (key-function narrower) (spyglass narrower)))
+
+(defmethod (setf haystack) :after (value (self narrower))
+  (setf (cache self) nil)
+  (narrow-mutate self))
+
+(defmethod needle-append ((self narrower) character)
+  (setf (needle self) (concatenate 'string (needle self) (coerce (list character) 'string)))
+  (narrow-mutate self)
+  (format t "results: ~s~%" (results self)))
+(defmethod needle-backspace ((self narrower))
+  (setf (needle self) (subseq (needle self) 0 (max 0 (1- (length (needle self))))))
+  (narrow-mutate self)
+  (format t "results: ~s~%" (results self)))
+(defmethod needle-clear ((self narrower))
+  (setf (needle self) "")
+  (narrow-mutate self)
+  (format t "results: ~s~%" (results self)))
+
 (defmethod (setf results) :after (value (self narrower))
-  (mapcar (lambda (hook) (funcall hook self)) (hook-list self)))
+  (mapcar (lambda (hook) (funcall hook self)) (result-hooks self)))
 
-(defun make-narrower (key filter &optional hooks candidates criteria)
+(defun make-narrower (&key filter key hooks haystack needle)
   (let ((obj (make-instance 'narrower
-                            :candidates candidates
-                            :criteria criteria
-                            :key-function key
-                            :filter-function filter
-                            :hook-list hooks
-                            :results (narrow candidates criteria key filter))))
-    (mapcar #'funcall hooks)
+                            :haystack haystack
+                            :needle (or needle "")
+                            :key-function (or key (lambda (x) x))
+                            :spyglass (or filter #'nonconsecutive-substring-match)
+                            :result-hooks hooks
+                            :cache (make-hash-table :test 'equal))))
+    (narrow-mutate obj)
+    (dolist (hook hooks)
+      (funcall hook obj))
     obj))

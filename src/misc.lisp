@@ -69,3 +69,6 @@
                          command
                          (string-downcase (format nil "~s" (convert-symbols command))))))
         (trivial-shell:shell-command (format nil "emacsclient --eval \"~a\"" command)))))
+
+(defun command (control-string &rest format-arguments)
+  (trivial-shell:shell-command (apply #'format nil control-string format-arguments)))

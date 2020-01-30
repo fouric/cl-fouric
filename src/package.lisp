@@ -77,4 +77,7 @@
    #:render-text
    #:sdl2-event-process
    #:sdl2-event-recursion
+
+   ;; misc
+   #:command
    ))
