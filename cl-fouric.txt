@@ -1,0 +1,14 @@
+meta:
+    description: just a place to put stuff for working on cl-fouric (common-code) sub-projects, like f:narrower
+
+todo:
+    fix bug where, if you shrink the window, there can be a race condition where you use the old value of the window size and draw outside of the new window
+    make charms handle explicit so you don't get athena crashes when you load cl-fouric in another system in the same image
+
+inbox:
+    make f:auto(complete) module/object that maybe integrates with f:narrower?
+    steal features from rofi (https://github.com/davatorium/rofi) to use in f:narrower
+    build pop-up mode for f:narrower, and daemon mode, and integration into SDL program
+    athena currently wants a narrower that does NOT automatically reset when narrowed to a single option (polled in INBOX-SORT-HANDLE-INPUT, not hooked), that
+        that's actually kind of what we do now - try to swap it in and see what happens
+    narrower: also add option to throw error or run hook when narrowed to zero entries

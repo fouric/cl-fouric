@@ -64,6 +64,11 @@
    #:criteria
    #:candidates
    #:results
+   #:haystack
+   #:needle
+   #:needle-append
+   #:needle-backspace
+   #:needle-clear
 
    ;; sdl2
    #:sdl2-omni

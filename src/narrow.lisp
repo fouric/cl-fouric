@@ -54,62 +54,61 @@
           (gethash (needle self) (cache self)) results))
   (run-hooks self))
 
-(defmethod needle-append ((self narrower) character)
-  (with-accessors+ (cache key-function spyglass haystack) self
-    (let* ((old-needle (needle self))
-           (new-needle (concatenate 'string old-needle (coerce (list character) 'string)))
-           (cached-results (gethash old-needle cache 'uncached)))
-      (setf (results self) (if (eq cached-results 'uncached)
-                               (let* ((last-level-cache (if (string= old-needle "")
-                                                            haystack
-                                                            (ensure-gethash old-needle cache (narrow haystack old-needle key-function spyglass))))
-                                      (results (narrow last-level-cache new-needle key-function spyglass)))
-                                 (format t "generated new cache value for ~s~%" new-needle)
-                                 (setf (gethash (needle self) cache) results))
-                               (progn
-                                 (format t "used cache value for ~s~%" new-needle)
-                                 cached-results))
-            (needle self) new-needle)))
-  (run-hooks self)
-  (format t "results: ~s~%" (results self)))
-(defmethod needle-backspace ((self narrower))
-  (with-accessors+ (cache key-function spyglass haystack) self
-    (let* ((old-needle (needle self))
-           (new-needle (subseq (needle self) 0 (max 0 (1- (length (needle self))))))
-           (cached-results (gethash old-needle cache 'uncached)))
-      (setf (results self) (if (eq cached-results 'uncached)
-                               (if (not (string= new-needle ""))
-                                   (let ((results (ensure-gethash new-needle cache (narrow haystack new-needle key-function spyglass))))
+(defmethod needle-append ((narrower narrower) character)
+  (with-accessors+ (cache key-function spyglass haystack) narrower
+    (let* ((new-needle (concatenate 'string (needle narrower) (coerce (list character) 'string)))
+           (cached-results (gethash new-needle cache 'uncached)))
+      (setf (results narrower) (if (eq cached-results 'uncached)
+                                   (let ((results (narrow haystack new-needle key-function spyglass)))
                                      (format t "generated new cache value for ~s~%" new-needle)
-                                     (setf (gethash (needle self) cache) results))
+                                     (setf (gethash new-needle cache) results))
+                                   (progn
+                                     (format t "used cache value for ~s~%" new-needle)
+                                     cached-results))
+            (needle narrower) new-needle)))
+  (run-hooks narrower)
+  (format t "results: ~s~%" (results narrower)))
+(defmethod needle-backspace ((narrower narrower))
+  (with-accessors+ (cache key-function spyglass haystack) narrower
+    (let* ((new-needle (subseq (needle narrower) 0 (max 0 (1- (length (needle narrower)))))))
+      (setf (results narrower) (if (not (string= new-needle ""))
+                                   (let ((cached-results (gethash new-needle cache 'uncached)))
+                                     (if (eq cached-results 'uncached)
+                                         (let ((results (narrow haystack new-needle key-function spyglass)))
+                                           (format t "generated new cache value for ~s~%" new-needle)
+                                           (setf (gethash new-needle cache) results))
+                                         (progn
+                                           (format t "used cache value for ~s~%" new-needle)
+                                           cached-results)))
                                    (progn
                                      (format t "used haystack for results~%")
                                      haystack))
-                               (progn
-                                 (format t "used cache value for ~s~%" new-needle)
-                                 cached-results))
-            (needle self) new-needle)))
-  (run-hooks self)
-  (format t "results: ~s~%" (results self)))
-(defmethod needle-clear ((self narrower))
-  (setf (needle self) ""
-        (results self) (haystack self))
-  (run-hooks self)
-  (format t "results: ~s~%" (results self)))
+            (needle narrower) new-needle)))
+  (run-hooks narrower)
+  (format t "results: ~s~%" (results narrower)))
+(defmethod needle-clear ((narrower narrower))
+  (setf (needle narrower) ""
+        (results narrower) (haystack narrower))
+  (run-hooks narrower)
+  (format t "results: ~s~%" (results narrower)))
 
-(defun run-hooks (self)
-  (dolist (hook (result-hooks self))
-    (funcall hook self)))
+(defun run-hooks (narrower)
+  (dolist (hook (result-hooks narrower))
+    (funcall hook narrower)))
 
-(defun make-narrower (&key filter key hooks haystack needle)
+(defun reset (narrower)
+  (setf (cache narrower) (make-hash-table :test 'equal)
+        (needle narrower) ""))
+
+(defun make-narrower (&key (spyglass #'nonconsecutive-substring-match) (key #'identity) hooks haystack (needle ""))
   (let ((obj (make-instance 'narrower
                             :haystack haystack
-                            :needle (or needle "")
-                            :key-function (or key #'identity)
-                            :spyglass (or filter #'nonconsecutive-substring-match)
+                            :needle needle
+                            :key-function key
+                            :spyglass spyglass
                             :result-hooks hooks
-                            :cache (make-hash-table :test 'equal))))
-    (setf (result obj) haystack)
+                            :cache (make-hash-table :test 'equal)
+                            :results (narrow haystack needle key spyglass))))
     (dolist (hook hooks)
       (funcall hook obj))
     obj))
