@@ -11,6 +11,7 @@
   :serial t
   :pathname "src"
   :components ((:file "package")
+               (:file "types")
                (:file "iteration")
                (:file "io")
                (:file "macro")

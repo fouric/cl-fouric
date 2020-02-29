@@ -12,17 +12,19 @@
                        :if-exists :supersede)
     (print object out)))
 
-(defun file-lines (filename &optional filter)
+(declaim (ftype (function (pathname-designator &optional function-designator) list) file-lines))
+(defun file-lines (filespec &optional filter)
   "read in the named file into a list of strings, one per line, and optionally call FILTER on each line"
-  (with-open-file (in filename
+  (with-open-file (in filespec
                       :direction :input
                       :if-exists :supersede)
     (loop for line = (read-line in nil) while line collect (if filter (funcall filter line) line))))
 
-(defun write-lines (filename lines)
-  (with-open-file (out filename
-                      :direction :output
-                      :if-exists :supersede)
+(declaim (ftype (function (pathname-designator list) t) write-lines))
+(defun write-lines (filespec lines)
+  (with-open-file (out filespec
+                       :direction :output
+                       :if-exists :supersede)
     (dolist (line lines)
       (format out "~a~%" line))))
 
