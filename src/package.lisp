@@ -1,3 +1,5 @@
+(push :fouric *features*)
+
 (defpackage #:fouric
   (:use #:cl)
   (:local-nicknames (:a :alexandria))
@@ -86,4 +88,5 @@
    ;; misc
    #:command
    #:ensure-gethash
+   #:defn
    ))

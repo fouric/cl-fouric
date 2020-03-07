@@ -12,3 +12,12 @@ inbox:
     athena currently wants a narrower that does NOT automatically reset when narrowed to a single option (polled in INBOX-SORT-HANDLE-INPUT, not hooked), that
         that's actually kind of what we do now - try to swap it in and see what happens
     narrower: also add option to throw error or run hook when narrowed to zero entries
+    make f:memoize-load-file that first hashes target file, compares it to existing hash, and then either loads cached data (maybe not from memory, but from pre-transformed results somewhere else on disk) or loads new and then puts it in cache
+    make f:with-accessors++ that uses CLOS to programmatically extract slots from given object
+    build premade widgets for sdl and charms for narrower, but don't be afraid of reimplementing them!
+    f:narrower might want to eventually development token separation & matching, fuzzy-matching, frecency
+    make library for different kinds of smoothing animations/effects, display graphically, make framework for presenting them and abstracting code from data
+        don't abstract too much
+        provide concrete implementations that don't rely on common or library code, but are just individual self-contained snippets
+    make algorithm for "progress bar smoothing" that causes the displayed bar progress to smoothly follow the actual progress with a short smoothing time
+    make f:mapcar-autoreplicate (f:map) that, when it receives an argument that is a single value instead of a list (and remember, list of one element isn't a single value), it replicates that value for every call

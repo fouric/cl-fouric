@@ -77,8 +77,26 @@
   (a:with-gensyms (default result)
     (a:once-only (key hash-table)
       `(let* ((,default (gensym))
-             (,result (gethash ,key ,hash-table ,default)))
+              (,result (gethash ,key ,hash-table ,default)))
          (if (eq ,result ,default)
              (setf (gethash ,key ,hash-table) (progn
                                                 ,@value-generation-body))
              ,result)))))
+
+(defmacro defn (name (&key redefinition-hook) lambda-list &body body)
+  (let ((handler (getf (symbol-plist name) 'redefinition-hook)))
+    (if handler
+        (progn
+          (format t "~&handler found for symbol ~s: ~s~%" name handler)
+          (funcall (eval redefinition-hook)))
+        (progn
+          (format t "~&no handler found for symbol ~s~%" name)
+          (setf (getf (symbol-plist name) 'redefinition-hook) (eval redefinition-hook)))))
+  `(defun ,name ,lambda-list
+     ,@body))
+
+#++(defun test-add-it ()
+  (print (add-it 10 20)))
+
+#++(defn add-it (:redefinition-hook #'test-add-it) (a b)
+  (+ a b))

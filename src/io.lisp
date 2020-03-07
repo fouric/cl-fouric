@@ -12,6 +12,7 @@
                        :if-exists :supersede)
     (print object out)))
 
+;; TODO: rename "filter" to "transformer", and then have a "filter" whose boolean value decides whether to keep a line or not
 (declaim (ftype (function (pathname-designator &optional function-designator) list) file-lines))
 (defun file-lines (filespec &optional filter)
   "read in the named file into a list of strings, one per line, and optionally call FILTER on each line"

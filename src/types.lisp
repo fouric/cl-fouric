@@ -2,8 +2,9 @@
 
 (deftype pathname-designator ()
   '(or string
-    #++file-associated-stream
-    pathname))
+    pathname
+    ;;file-associated-stream
+    ))
 
 (deftype function-designator ()
   '(or symbol
