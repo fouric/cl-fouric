@@ -91,6 +91,7 @@
    #:defn
 
    #:run-tests
+   #:run-all-tests
    #:add-test
    #:remove-test
    #:list-tests
