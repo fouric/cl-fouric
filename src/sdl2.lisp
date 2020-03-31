@@ -300,3 +300,44 @@ t)
 (:quit ()
 (setf quit? (quit-function)))))
 |#
+
+
+
+(defun gooey ()
+  (sdl2:with-init (:everything)
+    (sdl2:with-window (window :w 400 :h 400)
+      (sdl2:with-renderer (renderer window :flags '(:accelerated :presentvsync))
+        (unless sdl2::*event-loop*
+          (setf sdl2::*event-loop* t)
+          (sdl2:in-main-thread (:background nil)
+            (unwind-protect
+                 (inner window renderer `())
+              (setf sdl2::*event-loop* nil))))))))
+
+(defun inner (window renderer data)
+  (sdl2:with-sdl-event (event)
+    (unless (eq :quit (if (not (zerop (sdl2:next-event event :poll nil)))
+                          (let* ((event-type (sdl2:get-event-type event))
+                                 (event-id (and (sdl2::user-event-type-p event-type) (event :user :code))))
+                            (prog1
+                                (handle-event window renderer event data event-type)
+                              (when (and event-id (not (eq event-type :lisp-message)))
+                                (sdl2::free-user-data event-id))))
+                          (handle-event window renderer nil data :idle)))
+      (inner window renderer data))))
+
+(defun handle-event (window renderer event data event-type)
+  (declare (ignore window data))
+  (case event-type
+    (:lisp-message
+     (sdl2::get-and-handle-messages))
+    (:keydown
+     (let ((keysym (plus-c:c-ref event sdl2-ffi:sdl-event :key :keysym)))
+       (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
+         (sdl2:push-event :quit))))
+    (:idle
+     (sdl2:set-render-draw-color renderer 0 0 0 255)
+     (sdl2:render-clear renderer)
+     (sdl2:render-present renderer))
+    (:quit
+     (return-from handle-event :quit))))

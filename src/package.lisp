@@ -89,4 +89,10 @@
    #:command
    #:ensure-gethash
    #:defn
+
+   #:run-tests
+   #:add-test
+   #:remove-test
+   #:list-tests
+   #:clear-tests
    ))

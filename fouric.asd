@@ -23,6 +23,8 @@
                (:file "constants")
                (:file "charms")
                (:file "narrow")
-               (:file "sdl2"))
+               (:file "sdl2")
+               (:file "run-tests")
+               )
 
   :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria :trivial-indent :cl-charms))

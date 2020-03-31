@@ -4,6 +4,7 @@ meta:
 todo:
     fix bug where, if you shrink the window, there can be a race condition where you use the old value of the window size and draw outside of the new window
     make charms handle explicit so you don't get athena crashes when you load cl-fouric in another system in the same image
+    import scripts and code from to-port
 
 inbox:
     make f:auto(complete) module/object that maybe integrates with f:narrower?
