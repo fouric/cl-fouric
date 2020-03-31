@@ -24,6 +24,7 @@
                (:file "charms")
                (:file "narrow")
                (:file "sdl2")
+               (:file "sdl2-terminal")
                (:file "tests")
                )
 

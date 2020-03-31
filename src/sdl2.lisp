@@ -10,102 +10,9 @@
 (defun font (name size)
   (sdl2-ttf:open-font (resource (concatenate 'string "fonts/" name)) size))
 
-#|
-(when surface (sdl2:free-surface surface))
-(when texture (sdl2:destroy-texture texture))
-(when rect (sdl2:free-rect rect))
-|#
-
-(defparameter *character-width* nil)
-(defparameter *character-height* nil)
-
-(defun col>pix (column-index)
-  (* column-index *character-width*))
-(defun row>pix (row-index)
-  (* row-index *character-height*))
-
-(defstruct cell
-  (fg-color (list 255 255 255) :type list)
-  (bg-color (list 0 0 0) :type list)
-  (char #\Space :type character)
-  (surface nil)
-  (texture nil))
-
-(defun draw-cell (renderer cell rect)
-  (when (cell-texture cell)
-    (let ((color (cell-bg-color cell)))
-      (sdl2:set-render-draw-color renderer (nth 0 color) (nth 1 color) (nth 2 color) 255))
-    (sdl2:render-draw-rect renderer rect)
-    (sdl2:render-copy renderer (cell-texture cell) :source-rect (cffi:null-pointer) :dest-rect rect)))
-
-(defun draw-grid (renderer grid rows cols)
-  (let ((rect (sdl2:make-rect 0 0 *character-width* *character-height*)))
-    (dotimes (y rows)
-      (dotimes (x cols)
-        (let ((cell (aref grid y x)))
-          (when cell
-            (plus-c:c-let ((rect sdl2-ffi:sdl-rect :from rect))
-              (setf (rect :x) (* x *character-width*)
-                    (rect :y) (* y *character-height*)))
-            (draw-cell renderer cell rect)))))))
-
-(defun set-cell (renderer cell-grid font x y &key (char #\Space) fg bg)
-  (let* ((cell (aref cell-grid y x)))
-    (when fg
-      (setf (cell-fg-color cell) fg))
-    (when bg
-      (setf (cell-bg-color cell) bg))
-    (let ((color (cell-fg-color cell)))
-      (setf (cell-char cell) char)
-      (setf (cell-surface cell) (sdl2-ttf:render-text-blended font (coerce (list (cell-char cell)) 'string) (nth 0 color) (nth 1 color) (nth 2 color) 255))
-      (setf (cell-texture cell) (sdl2:create-texture-from-surface renderer (cell-surface cell))))))
-
-(defun termlib-test ()
-  (sdl2:with-init (:everything)
-    (sdl2:with-window (window)
-      (sdl2:with-renderer (renderer window :flags '(:accelerated))
-        (with-ttf-init
-          (multiple-value-bind (window-width window-height)
-              (sdl2:get-window-size window)
-            (format t "~s~%" (cons window-width window-height))
-            (let* ((font (sdl2-ttf:open-font (fouric:resource "fonts/UbuntuMono-R.ttf" 'gooey) 36))
-                   (surface (sdl2-ttf:render-text-blended font " " 200 0 200 255))
-                   (texture (sdl2:create-texture-from-surface renderer surface)))
-              (setf *character-width* (sdl2:texture-width texture)
-                    *character-height* (sdl2:texture-height texture))
-              (let* ((num-rows (floor (/ window-height *character-height*)))
-                     (num-cols (floor (/ window-width *character-width*)))
-                     (cell-grid (make-array (list num-rows num-cols) :initial-element nil))
-                                        ;(rect (sdl2:make-rect (col>pix 0) (row>pix 0) *character-width* *character-height*))
-                     )
-
-                (dotimes (y num-rows)
-                  (dotimes (x num-cols)
-                    (setf (aref cell-grid y x) (make-cell))))
-
-                (set-cell renderer cell-grid font 0 0 :char #\+ :fg (list 255 255 255))
-                (set-cell renderer cell-grid font 1 0 :char #\- :fg (list 255 255 255))
-                (set-cell renderer cell-grid font 0 1 :char #\| :fg (list 255 255 255))
-                (set-cell renderer cell-grid font 1 1 :char #\@ :fg (list 255 0 255))
-
-                (sdl2:with-event-loop (:method :poll)
-                  (:keyup (:keysym keysym)
-                          (let ((scancode-value (sdl2:scancode-value keysym)))
-                            (cond
-                              ((sdl2:scancode= scancode-value :scancode-escape) (sdl2:push-event :quit)))))
-                  (:idle ()
-                         (sdl2:set-render-draw-color renderer 0 0 0 255)
-                         (sdl2:render-clear renderer)
-
-                                        ;(sdl2:set-render-draw-color renderer 255 255 255 255)
-                                        ;(sdl2:render-draw-rect renderer rect)
-
-                                        ;(sdl2:render-copy renderer texture :source-rect (cffi:null-pointer) :dest-rect rect)
-
-                         (draw-grid renderer cell-grid num-rows num-cols)
-
-                         (sdl2:render-present renderer))
-                  (:quit () t))))))))))
+#++(when surface (sdl2:free-surface surface))
+#++(when texture (sdl2:destroy-texture texture))
+#++(when rect (sdl2:free-rect rect))
 
 (defmacro with-init-window-gl ((init-flags window-flags gl-flags) &body body)
   `(sdl2:with-init ,init-flags
@@ -268,42 +175,36 @@
               ,@body)
          (setf sdl2::*event-loop* nil)))))
 
-#| use like so:
-
-(defun gooey ()
-(sdl2:with-init (:everything)
-(sdl2:with-window (window :w 400 :h 400)
-(sdl2:with-renderer (renderer window)
-(sdl2-event-recursion ()
-(process-next-loop renderer))))))
-
-(defun idle-function (renderer)
-(sdl2:set-render-draw-color renderer 255 255 255 255)
-(sdl2:render-clear renderer)
-(sdl2:render-present renderer))
-
-(defun quit-function ()
-t)
-
-(defun process-next-loop (renderer)
-(unless (process-next-event renderer nil) ;; blocks until we've processed all events, and returns non-nil if we want to quit
-(idle-function renderer)
-(process-next-loop renderer)))
-
-(defun process-next-event (renderer quit?)
-(sdl2-event-process (event)
-(:keydown (:keysym keysym)
-(when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
-(sdl2:push-event :quit)))
-(:idle ()
-(idle-function renderer))
-(:quit ()
-(setf quit? (quit-function)))))
-|#
+#++(defun gooey ()
+     (sdl2:with-init (:everything)
+       (sdl2:with-window (window :w 400 :h 400)
+         (sdl2:with-renderer (renderer window)
+           (sdl2-event-recursion ()
+             (process-next-loop renderer))))))
+#++(defun idle-function (renderer)
+     (sdl2:set-render-draw-color renderer 255 255 255 255)
+     (sdl2:render-clear renderer)
+     (sdl2:render-present renderer))
+#++(defun quit-function ()
+     t)
+#++(defun process-next-loop (renderer)
+     (unless (process-next-event renderer nil) ;; blocks until we've processed all events, and returns non-nil if we want to quit
+       (idle-function renderer)
+       (process-next-loop renderer)))
+#++(defun process-next-event (renderer quit?)
+     (sdl2-event-process (event)
+       (:keydown (:keysym keysym)
+                 (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
+                   (sdl2:push-event :quit)))
+       (:idle ()
+              (idle-function renderer))
+       (:quit ()
+              (setf quit? (quit-function)))))
 
 
+;;; here's some stuff that's more hard-coded - a template, not a framework or library - but gives you a recursive event loop and a separate event-handling function
 
-(defun gooey ()
+(defun sdl2-outer ()
   (sdl2:with-init (:everything)
     (sdl2:with-window (window :w 400 :h 400)
       (sdl2:with-renderer (renderer window :flags '(:accelerated :presentvsync))
@@ -311,10 +212,10 @@ t)
           (setf sdl2::*event-loop* t)
           (sdl2:in-main-thread (:background nil)
             (unwind-protect
-                 (inner window renderer `())
+                 (sdl2-inner window renderer `())
               (setf sdl2::*event-loop* nil))))))))
 
-(defun inner (window renderer data)
+(defun sdl2-inner (window renderer data)
   (sdl2:with-sdl-event (event)
     (unless (eq :quit (if (not (zerop (sdl2:next-event event :poll nil)))
                           (let* ((event-type (sdl2:get-event-type event))
@@ -323,10 +224,10 @@ t)
                                 (handle-event window renderer event data event-type)
                               (when (and event-id (not (eq event-type :lisp-message)))
                                 (sdl2::free-user-data event-id))))
-                          (handle-event window renderer nil data :idle)))
-      (inner window renderer data))))
+                          (sdl2-handle-event window renderer nil data :idle)))
+      (inner-inner window renderer data))))
 
-(defun handle-event (window renderer event data event-type)
+(defun sdl2-handle-event (window renderer event data event-type)
   (declare (ignore window data))
   (case event-type
     (:lisp-message
