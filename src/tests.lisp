@@ -1,9 +1,6 @@
 (in-package #:fouric)
 
-;; TODO: ask whether to use symbol-plists or hash tables
-;; actually, should almost certainly use a hash table in the fouric package, to prevent pollution...
-;; or maybe just need to CLEAR-TESTS for everything before deploying binary
-;; TODO: ask #lisp and lisp discord about this
+;; TODO: everyone says to use symbol-plists, with a key in our package (and not the keyword package), and i agree
 
 #++(progn
      (setf *features* (remove :fouric/hashtable *features*))
