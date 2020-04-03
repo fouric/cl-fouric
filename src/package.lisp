@@ -96,4 +96,5 @@
    #:remove-test
    #:list-tests
    #:clear-tests
+   #:rove-notify-test
    ))

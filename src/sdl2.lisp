@@ -208,30 +208,43 @@
   (sdl2:with-init (:everything)
     (sdl2:with-window (window :w 400 :h 400)
       (sdl2:with-renderer (renderer window :flags '(:accelerated :presentvsync))
+        ;; flag the event loop as running
         (unless sdl2::*event-loop*
           (setf sdl2::*event-loop* t)
+          ;; not sure what in-main-thread does
           (sdl2:in-main-thread (:background nil)
             (unwind-protect
-                 (sdl2-inner window renderer `())
+                 (sdl2-inner window renderer nil) ; that last argument is the initial user data
+              ;; make sure that we clear the flag when we quit
               (setf sdl2::*event-loop* nil))))))))
 
 (defun sdl2-inner (window renderer data)
+  (update-swank)
+  ;; allocate and free C-space SDL struct
   (sdl2:with-sdl-event (event)
-    (unless (eq :quit (if (not (zerop (sdl2:next-event event :poll nil)))
+    ;; we use the retval of HANDLE-EVENT for basic feedback
+    ;; right now, the only thing we do is check to see if it's :QUIT, and if it is, we quit
+    (unless (eq :quit (if (not (zerop (sdl2:next-event event :poll nil))) ; NEXT-EVENT will fill the event struct with data
+                          ;; if we got an event, pass it in to HANDLE-EVENT
                           (let* ((event-type (sdl2:get-event-type event))
-                                 (event-id (and (sdl2::user-event-type-p event-type) (event :user :code))))
-                            (prog1
-                                (handle-event window renderer event data event-type)
-                              (when (and event-id (not (eq event-type :lisp-message)))
-                                (sdl2::free-user-data event-id))))
-                          (sdl2-handle-event window renderer nil data :idle)))
-      (inner-inner window renderer data))))
+                                 (event-id (and (sdl2::user-event-type-p event-type) (event :user :code)))
+                                 retval)
+                            (if (eq event-type :lisp-message)
+                                (sdl2::get-and-handle-messages)
+                                (progn
+                                  (setf retval (sdl2-handle-event window renderer event-type event data))
+                                  (when event-id
+                                    (sdl2::free-user-data event-id))))
+                            retval)
+                          ;; if we didn't get an event, then just pass in the :IDLE symbol
+                          (sdl2-handle-event window renderer :idle nil data)))
+      ;; recursively call ourselves again, to enable hotpatching
+      (sdl2-inner window renderer data))))
 
-(defun sdl2-handle-event (window renderer event data event-type)
-  (declare (ignore window data))
+;; the goal is to move as much boilerplate out of HANDLE-EVENT as possible for megan
+(defun sdl2-handle-event (window renderer event-type event data)
+  (declare (ignore window))
   (case event-type
-    (:lisp-message
-     (sdl2::get-and-handle-messages))
     (:keydown
      (let ((keysym (plus-c:c-ref event sdl2-ffi:sdl-event :key :keysym)))
        (when (sdl2:scancode= (sdl2:scancode-value keysym) :scancode-q)
@@ -241,4 +254,5 @@
      (sdl2:render-clear renderer)
      (sdl2:render-present renderer))
     (:quit
-     (return-from handle-event :quit))))
+     (return-from sdl2-handle-event :quit)))
+  nil)
