@@ -28,4 +28,4 @@
                (:file "tests")
                )
 
-  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria :trivial-indent :cl-charms :rove))
+  :depends-on (:sdl2 :sdl2-ttf :swank #+sbcl :sb-sprof :trivial-shell :alexandria :trivial-indent :cl-charms #++ :rove))

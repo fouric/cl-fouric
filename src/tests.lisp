@@ -79,7 +79,7 @@
 (defun clear-tests (function-name)
   (setf (gethash function-name *tests*) nil))
 
-(defun rove-notify-test (function-name rove-test-name)
+#++(defun rove-notify-test (function-name rove-test-name)
   (add-test function-name rove-test-name (lambda () (unless (rove:run-test rove-test-name :style :none)
                                                       (trivial-shell:shell-command (format nil "notify-send \"test ~s for ~s failed\"" rove-test-name function-name))
                                                       (format t "notify-send \"test ~s for ~s failed\"" rove-test-name function-name)))))
