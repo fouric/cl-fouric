@@ -104,6 +104,10 @@
     (concatenate 'string (list char) (repeatchar char (1- count)))))
 
 (defun charms-draw-box (x y w h &optional (fancy t))
+  ;; TODO: make less hacky
+  (when (and (string= (lisp-implementation-type) "SBCL")
+             (string= (lisp-implementation-version) "2.0.3"))
+    (setf fancy nil))
   ;; usually takes no more than a few hundred microseconds per call, although the complexity does scale with the box size
   (let* ((w (min w (- *screen-width* x)))
          (h (min h (- *screen-height* y)))

@@ -5,6 +5,7 @@ todo:
     fix bug where, if you shrink the window, there can be a race condition where you use the old value of the window size and draw outside of the new window
     make charms handle explicit so you don't get athena crashes when you load cl-fouric in another system in the same image
     import scripts and code from to-port
+    make WITH-OFFSET macro that dynamically binds some x-offset and y-offset values that are added to charms x and y function args while drawing
 
 inbox:
     make f:auto(complete) module/object that maybe integrates with f:narrower?
@@ -22,3 +23,14 @@ inbox:
         provide concrete implementations that don't rely on common or library code, but are just individual self-contained snippets
     make algorithm for "progress bar smoothing" that causes the displayed bar progress to smoothly follow the actual progress with a short smoothing time
     make f:mapcar-autoreplicate (f:map) that, when it receives an argument that is a single value instead of a list (and remember, list of one element isn't a single value), it replicates that value for every call
+    net library: make lots of macros to facilitate interfacing between nets and normal assignment-driven code, and develop as many use cases as you can
+    first figure out how unit tests work, then write tests for net library, then make net library
+    f:net should be thread-safe (use mutex), have either two hooks or one hook with arg to indicate that a net value has been written to but the value has not been changed (check by eq/eql/equal/equalp/arbitrary user-specified function) vs value actually changing
+        you shouldn't need to worry about equality check being expensive, because a net should only hold one kind of value, and so you should know what type that is, and what comparison function to use on it
+    f:net should have easy way to create "combinational" logic
+        e.g. take a (pure) function like +, hook two nets as args/inputs and then have value computer every time one input net changed and then written to output
+    f:net: think about how to make as convenient as normal CL programming
+        maybe steal setf expanders?
+    think about how to optimize nets with static typing & quajects
+        in particular, the update code, and calling hooks
+    add logging, instrumentation, debugging to nets
