@@ -27,10 +27,14 @@
    #:intersperse
    #:unix-to-universal-time
    #:update-swank
+
+   ;; macros
    #:udefun
    #:cond?
    #:out
    #:on-global-update
+   #:retry-once
+
    #:nmember
    #:nonconsecutive-substring-match
    #:emacs-eval

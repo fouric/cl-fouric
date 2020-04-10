@@ -6,6 +6,7 @@ todo:
     make charms handle explicit so you don't get athena crashes when you load cl-fouric in another system in the same image
     import scripts and code from to-port
     make WITH-OFFSET macro that dynamically binds some x-offset and y-offset values that are added to charms x and y function args while drawing
+    eval-on-compile/compile-defun-hook should not be bound to "tests" so that you can force redraw athena window when a GUI function is recompiled
 
 inbox:
     make f:auto(complete) module/object that maybe integrates with f:narrower?

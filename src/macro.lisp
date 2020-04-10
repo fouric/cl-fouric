@@ -90,3 +90,42 @@
          (setf (get ',binding 'old-value) ,binding)
          ,@body)
        (setf (get ',binding 'old-value) ,binding))))
+
+(defmacro retry-once (form)
+  (a:with-gensyms (try-it)
+    `(block ,try-it
+       (handler-bind
+           ((error
+              (lambda (c)
+                (declare (ignore c))
+                (handler-bind
+                    ((error
+                       #'error))
+                  (return-from ,try-it ,form)))))
+         ,form))))
+
+#++(defmacro retry-once ((retry-if-different-error) form)
+  (a:with-gensyms (try-it tried-once)
+    `(block ,try-it
+       (let (,tried-once)
+         (handler-bind
+             ((error
+                (lambda (c1)
+                  (setf ,tried-once c1)
+                  (handler-bind
+                      ((error
+                         (lambda (c2)
+                           (format t "already tried to recover once, dying~%")
+                           (error c2))))
+                    (return-from ,try-it ,form)))))
+           ,form)))))
+
+;; use to test RETRY-ONCE
+#++(defparameter flag nil)
+#++(defun error-alternate ()
+  (format t "flag was ~s~%" flag)
+  (setf flag (not flag))
+  (format t "flag now ~s~%" flag)
+  (when flag
+    (error "flag set"))
+  'error-alternate)
