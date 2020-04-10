@@ -103,21 +103,17 @@
     ""
     (concatenate 'string (list char) (repeatchar char (1- count)))))
 
-(defun charms-draw-box (x y w h &optional (fancy t))
-  ;; TODO: make less hacky
-  (when (and (string= (lisp-implementation-type) "SBCL")
-             (string= (lisp-implementation-version) "2.0.3"))
-    (setf fancy nil))
+(defun charms-draw-box (x y w h)
   ;; usually takes no more than a few hundred microseconds per call, although the complexity does scale with the box size
   (let* ((w (min w (- *screen-width* x)))
          (h (min h (- *screen-height* y)))
          ;; make a string of entirely the horizontal line character, w units long
-         (upper-left (if fancy #\box_drawings_light_down_and_right #\+))
-         (upper-right (if fancy #\box_drawings_light_down_and_left #\+))
-         (lower-left (if fancy #\box_drawings_light_up_and_right #\+))
-         (lower-right (if fancy #\box_drawings_light_up_and_left #\+))
-         (vertical (if fancy "│" "|"))
-         (horizontal (make-string w :initial-element (if fancy #\BOX_DRAWINGS_LIGHT_HORIZONTAL #\-))))
+         (upper-left #\+)
+         (upper-right #\+)
+         (lower-left #\+)
+         (lower-right #\+)
+         (vertical "|")
+         (horizontal (make-string w :initial-element #\-)))
     ;; set the first and last elements to be the upper left and right corners, respectively
     (setf (aref horizontal 0) upper-left
           (aref horizontal (1- w)) upper-right)
