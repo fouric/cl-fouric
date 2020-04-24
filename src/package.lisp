@@ -34,6 +34,8 @@
    #:out
    #:on-global-update
    #:retry-once
+   #:let-ret1
+   #:with-accumulator
 
    #:nmember
    #:nonconsecutive-substring-match

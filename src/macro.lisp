@@ -129,3 +129,19 @@
   (when flag
     (error "flag set"))
   'error-alternate)
+
+(defmacro let-ret1 (bindings &body body)
+  `(let ,bindings
+     ,@body
+     ,(caar bindings)))
+
+(defmacro with-accumulator (&body body)
+  (alexandria:with-gensyms (list)
+    `(let (,list)
+       (flet ((clear ()
+                (prog1
+                    (nreverse ,list)
+                  (setf ,list nil)))
+              (accumulate (value)
+                (push value ,list)))
+         ,@body))))

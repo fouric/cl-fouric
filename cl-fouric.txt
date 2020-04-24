@@ -7,6 +7,9 @@ todo:
     import scripts and code from to-port
     make WITH-OFFSET macro that dynamically binds some x-offset and y-offset values that are added to charms x and y function args while drawing
     eval-on-compile/compile-defun-hook should not be bound to "tests" so that you can force redraw athena window when a GUI function is recompiled
+    f:magic-scroll
+    f:net
+    f:sdl2
 
 inbox:
     make f:auto(complete) module/object that maybe integrates with f:narrower?
@@ -35,3 +38,7 @@ inbox:
     think about how to optimize nets with static typing & quajects
         in particular, the update code, and calling hooks
     add logging, instrumentation, debugging to nets
+    need to develop some sort of (ideally automatic) retry-once-on-draw thing for charms that retries once to draw (after updating window width and height) for when you resize window
+        maybe just generic RETRY-ONCE macro, that has an "extra" form to run first before retrying, and if it fails, it passes up the condition that it got
+            maybe two variants, one that fails if it got two ERRORS (not just generic conditions) of any kind, and another that will keep retrying if it gets a different kind of condition the second time
+    make special subclass of net, file-net, that can use entr to push changes into itself when the file changes
