@@ -62,10 +62,10 @@
    #:+color-blue-black+
    #:+color-black-blue+
    #:+color-black-black+
-   #:*screen-width*
-   #:*screen-height*
    #:charms-draw-box
    #:window-dimensions
+   #:width
+   #:height
 
    ;; narrower
    #:make-narrower

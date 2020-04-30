@@ -42,3 +42,9 @@ inbox:
         maybe just generic RETRY-ONCE macro, that has an "extra" form to run first before retrying, and if it fails, it passes up the condition that it got
             maybe two variants, one that fails if it got two ERRORS (not just generic conditions) of any kind, and another that will keep retrying if it gets a different kind of condition the second time
     make special subclass of net, file-net, that can use entr to push changes into itself when the file changes
+    two kinds of net-like objects:
+        those that have a value continuously driven on them
+            can't have more than one driver, because that causes crossbars, and is logically impossible
+            these are wire-like things
+        those that have values assigned to them, and value updates are fed into functions whose outputs update other nets
+        these two things are very different!
